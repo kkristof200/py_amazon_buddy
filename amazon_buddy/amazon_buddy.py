@@ -15,7 +15,7 @@ class AmazonBuddy:
     # -------------------------------------------------------- Public methods -------------------------------------------------------- #
 
     @classmethod
-    def search_asins(
+    def search_products(
         cls,
         search_term: str,
         ignored_title_strs: List[str] = [],
