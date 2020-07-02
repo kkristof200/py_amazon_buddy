@@ -1,0 +1,1 @@
+from .amazon_buddy import AmazonBuddy
