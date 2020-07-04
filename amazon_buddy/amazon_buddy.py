@@ -147,6 +147,9 @@ class AmazonBuddy:
         cmd = 'amazon-buddy' + ' ' + feature
 
         for k, v in params.items():
+            if isinstance(v, bool):
+                v = str(v).lower()
+
             cmd += ' ' + k + ' ' + str(v)
         
         return cmd
