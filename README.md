@@ -5,9 +5,10 @@
 Python wrapper for the [amazon-buddy](https://www.npmjs.com/package/amazon-buddy) npm package
 
 ## Install
-First you need to install amazon-buddy npm as cli
+First you need to install kfork-amazon-buddy npm as cli
 
 For instructions check [github](https://github.com/drawrowfly/amazon-scraper) or [npm](https://www.npmjs.com/package/amazon-buddy)
+NOTE: Install my fork (kfork-amazon-buddy) instead of (amazon-buddy). Other than that it should be the same isntallation process.
 
 ~~~~bash
 pip install amazon_buddy
