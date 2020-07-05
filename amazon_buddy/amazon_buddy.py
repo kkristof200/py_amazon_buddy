@@ -147,6 +147,12 @@ class AmazonBuddy:
         cmd = 'amazon-buddy' + ' ' + feature
 
         for k, v in params.items():
+            if k == '--random-ua':
+                k = '--ua'
+
+                from fake_useragent import FakeUserAgent
+
+                v = '\'' + FakeUserAgent().random.replace('\'', '\\\'') + '\''
             if isinstance(v, bool):
                 v = str(v).lower()
 
