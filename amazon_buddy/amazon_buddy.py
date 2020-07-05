@@ -45,17 +45,19 @@ class AmazonBuddy:
 
         for product in products:
             try:
+                from kcu import strings
+
                 product['price'] = float(product['price'].replace(',', ''))
-                product['asin'] = strings.string_between(product['url'].replace('%2F', '/'), '/dp/', '/')
+                product['asin'] = strings.between(product['url'].replace('%2F', '/'), '/dp/', '/')
 
                 if (
                     product['price'] < min_price
                     or
                     product['reviews'] < min_reviews
                     or
-                    self.__contains(product['asin'], ignored_asins)
+                    cls.__contains(product['asin'], ignored_asins)
                     or
-                    self.__contains_in(product['title'], ignored_title_strs)
+                    cls.__contains_in(product['title'], ignored_title_strs)
                 ):
                     continue
 
