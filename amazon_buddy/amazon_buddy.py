@@ -4,6 +4,9 @@
 from typing import Optional, Union, List, Dict, Any
 import os
 
+# Local
+from .category import Category
+
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
 
 
@@ -18,6 +21,7 @@ class AmazonBuddy:
     def search_products(
         cls,
         search_term: str,
+        category: Category = Category.ALL_DEPARTMENTS,
         ignored_title_strs: List[str] = [],
         ignored_asins: List[str] = [],
         min_price: float = 50.0,
@@ -32,6 +36,7 @@ class AmazonBuddy:
             random_ua=random_ua,
             extra_params={
                 '-k': '\'' + search_term + '\'',
+                '-c': category.value,
                 '-n': max_results,
                 '--min-rating': min_rating,
                 '--sort': sort
