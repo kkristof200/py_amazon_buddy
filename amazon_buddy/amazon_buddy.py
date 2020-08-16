@@ -29,7 +29,8 @@ class AmazonBuddy:
         min_rating: float = 0.0,
         max_results: int = 100,
         random_ua: bool = True,
-        sort: bool = True
+        sort: bool = True,
+        debug: bool = False
     ) -> Optional[List[str]]:
         products = cls.__exec_cmd(
             'products',
@@ -40,7 +41,8 @@ class AmazonBuddy:
                 '-n': max_results,
                 '--min-rating': min_rating,
                 '--sort': sort
-            }
+            },
+            debug=debug
         )
 
         if products is None:
@@ -79,7 +81,8 @@ class AmazonBuddy:
         min_rating: float = 0.0,
         max_results: int = 100,
         random_ua: bool = True,
-        sort: bool = True
+        sort: bool = True,
+        debug: bool = False
     ) -> Optional[List[str]]:
         return cls.__exec_cmd(
             'reviews ' + asin,
@@ -88,18 +91,21 @@ class AmazonBuddy:
                 '-n': max_results,
                 '--min-rating': min_rating,
                 '--sort': sort
-            }
+            },
+            debug=debug
         )
 
     @classmethod
     def get_product_details(
         cls,
         asin: str,
-        random_ua: bool = True
+        random_ua: bool = True,
+        debug: bool = False
     ) -> Optional[List[str]]:
         return cls.__exec_cmd(
             'asin ' + asin,
-            random_ua=random_ua
+            random_ua=random_ua,
+            debug=debug
         )
 
 
@@ -110,7 +116,8 @@ class AmazonBuddy:
         cls,
         feature: str,
         random_ua: bool = True,
-        extra_params: Optional[Dict[str, Any]] = None
+        extra_params: Optional[Dict[str, Any]] = None,
+        debug: bool = False
     ) -> Optional[Union[List, Dict]]:
         params = extra_params or {}
         params['--random-ua'] = random_ua
@@ -120,7 +127,7 @@ class AmazonBuddy:
 
         resp = sh.sh(
             cls.__create_cmd(feature, params),
-            debug=True
+            debug=debug
         ).strip()
 
         try:

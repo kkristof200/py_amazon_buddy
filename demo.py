@@ -1,8 +1,5 @@
-# from amazon_buddy import AmazonBuddy
+import json
+from amazon_buddy import AmazonBuddy, Category
 
-# print(AmazonBuddy.get_product_details('macbook'))
+print(json.dumps(AmazonBuddy.search_products('macbook', category=Category.COMPUTERS), indent=4))
 # print(AmazonBuddy.get_reviews('B01GW3H3U8', min_rating=4))
-
-from fake_useragent import FakeUserAgent
-
-print(FakeUserAgent().random)
