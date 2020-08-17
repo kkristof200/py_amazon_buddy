@@ -28,12 +28,14 @@ class AmazonBuddy:
         min_reviews: int = 5,
         min_rating: float = 0.0,
         max_results: int = 100,
+        user_agent: Optional[str] = None,
         random_ua: bool = True,
         sort: bool = True,
         debug: bool = False
     ) -> Optional[List[str]]:
         products = cls.__exec_cmd(
             'products',
+            user_agent=user_agent,
             random_ua=random_ua,
             extra_params={
                 '-k': '\'' + search_term + '\'',
@@ -80,12 +82,14 @@ class AmazonBuddy:
         asin: str,
         min_rating: float = 0.0,
         max_results: int = 100,
+        user_agent: Optional[str] = None,
         random_ua: bool = True,
         sort: bool = True,
         debug: bool = False
     ) -> Optional[List[str]]:
         return cls.__exec_cmd(
             'reviews ' + asin,
+            user_agent=user_agent,
             random_ua=random_ua,
             extra_params={
                 '-n': max_results,
@@ -99,11 +103,13 @@ class AmazonBuddy:
     def get_product_details(
         cls,
         asin: str,
+        user_agent: Optional[str] = None,
         random_ua: bool = True,
         debug: bool = False
     ) -> Optional[List[str]]:
         return cls.__exec_cmd(
             'asin ' + asin,
+            user_agent=user_agent,
             random_ua=random_ua,
             debug=debug
         )
@@ -115,12 +121,20 @@ class AmazonBuddy:
     def __exec_cmd(
         cls,
         feature: str,
+        user_agent: Optional[str] = None,
         random_ua: bool = True,
         extra_params: Optional[Dict[str, Any]] = None,
         debug: bool = False
     ) -> Optional[Union[List, Dict]]:
         params = extra_params or {}
-        params['--random-ua'] = random_ua
+
+        if user_agent:
+            params['--ua'] = user_agent
+        elif random_ua:
+            from fake_useragent import FakeUserAgent
+
+            params['--ua'] = FakeUserAgent().random
+
         params['--filetype'] = 'json'
 
         from kcu import sh, kjson, kpath
@@ -161,12 +175,8 @@ class AmazonBuddy:
         cmd = 'amazon-buddy' + ' ' + feature
 
         for k, v in params.items():
-            if k == '--random-ua':
-                k = '--ua'
-
-                from fake_useragent import FakeUserAgent
-
-                v = '\'' + FakeUserAgent().random.replace('\'', '\\\'') + '\''
+            if k == '--ua':
+                v = '\'' + v.replace('\'', '\\\'') + '\''
             if isinstance(v, bool):
                 v = str(v).lower()
 

@@ -9,14 +9,14 @@ else:
 
 setuptools.setup(
     name="amazon_buddy",
-    version="0.0.9",
+    version="0.0.10",
     author="Kristof",
     description="python wrapper for the amazon_buddy npm package",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/kkristof200/py_amazon_buddy",
     packages=setuptools.find_packages(),
-    install_requires=["kcu", "fake_useragent"],
+    install_requires=["fake_useragent", "kcu"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
