@@ -1,11 +1,14 @@
 # --------------------------------------------------------------- Imports ---------------------------------------------------------------- #
 
 # System
-from typing import Optional, Union, List, Dict, Any
+from typing import Optional, Union, List, Dict, Any, Union
 import os
 
 # Local
 from .category import Category
+from .sort_type import SortType
+from .product import *
+from .review import Review
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
 
@@ -22,6 +25,7 @@ class AmazonBuddy:
         cls,
         search_term: str,
         category: Category = Category.ALL_DEPARTMENTS,
+        sort_type: Optional[SortType] = None,
         ignored_title_strs: List[str] = [],
         ignored_asins: List[str] = [],
         min_price: float = 50.0,
@@ -32,7 +36,7 @@ class AmazonBuddy:
         random_ua: bool = True,
         sort: bool = True,
         debug: bool = False
-    ) -> Optional[List[str]]:
+    ) -> Optional[List[Union[Dict, Product]]]:
         products = cls.__exec_cmd(
             'products',
             user_agent=user_agent,
@@ -40,7 +44,8 @@ class AmazonBuddy:
             extra_params={
                 '-k': '\'' + search_term + '\'',
                 '-c': category.value,
-                '-n': max_results,
+                '-n': max_results if max_results <= 500 else 500,
+                '--productsorttype': sort_type.value if sort_type else None,
                 '--min-rating': min_rating,
                 '--sort': sort
             },
@@ -56,17 +61,16 @@ class AmazonBuddy:
             try:
                 from kcu import strings
 
-                product['price'] = float(product['price'].replace(',', ''))
-                product['asin'] = strings.between(product['url'].replace('%2F', '/'), '/dp/', '/')
+                product = Product(product)
 
                 if (
-                    product['price'] < min_price
+                    product.price.current < min_price
                     or
-                    product['reviews'] < min_reviews
+                    product.rating.count < min_reviews
                     or
-                    cls.__contains(product['asin'], ignored_asins)
+                    cls.__contains(product.asin, ignored_asins)
                     or
-                    cls.__contains_in(product['title'], ignored_title_strs)
+                    cls.__contains_in(product.title, ignored_title_strs)
                 ):
                     continue
 
@@ -87,7 +91,7 @@ class AmazonBuddy:
         sort: bool = True,
         debug: bool = False
     ) -> Optional[List[str]]:
-        return cls.__exec_cmd(
+        js = cls.__exec_cmd(
             'reviews ' + asin,
             user_agent=user_agent,
             random_ua=random_ua,
@@ -98,6 +102,11 @@ class AmazonBuddy:
             },
             debug=debug
         )
+
+        if js:
+            return [Review(j) for j in js]
+
+        return None
 
     @classmethod
     def get_product_details(
@@ -158,7 +167,7 @@ class AmazonBuddy:
             if path is None:
                 return None
 
-            print('path', path)
+            # print('path', path)
         except:
             return None
 
@@ -175,6 +184,9 @@ class AmazonBuddy:
         cmd = 'amazon-buddy' + ' ' + feature
 
         for k, v in params.items():
+            if not v:
+                continue
+
             if k == '--ua':
                 v = '\'' + v.replace('\'', '\\\'') + '\''
             if isinstance(v, bool):
