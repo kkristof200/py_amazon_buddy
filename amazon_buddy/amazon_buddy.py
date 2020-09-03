@@ -79,7 +79,7 @@ class AmazonBuddy:
                 pass
 
         return filtered_products
-    
+
     @classmethod
     def get_reviews(
         cls,
@@ -90,7 +90,7 @@ class AmazonBuddy:
         random_ua: bool = True,
         sort: bool = True,
         debug: bool = False
-    ) -> Optional[List[str]]:
+    ) -> Optional[List[Review]]:
         js = cls.__exec_cmd(
             'reviews ' + asin,
             user_agent=user_agent,
@@ -115,7 +115,7 @@ class AmazonBuddy:
         user_agent: Optional[str] = None,
         random_ua: bool = True,
         debug: bool = False
-    ) -> Optional[List[str]]:
+    ) -> Optional[Dict]:
         return cls.__exec_cmd(
             'asin ' + asin,
             user_agent=user_agent,
