@@ -24,5 +24,9 @@ class Review(JSONCodable):
         self.title = dict_['title']
         self.review = dict_['review']
 
+    @property
+    def text(self) -> str:
+        return self.review
+
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
