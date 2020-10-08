@@ -2,13 +2,25 @@
 
 # System
 from typing import Optional, Union, List, Dict, Any, Union
+import urllib.parse
 import os
 
 # Local
-from .category import Category
-from .sort_type import SortType
-from .product import *
-from .review import Review
+from .enums.category import Category
+from .enums.sort_type import SortType
+from .enums.product_condition import ProductCondition
+
+from .models.product import *
+from .models.review import Review
+
+# ---------------------------------------------------------------------------------------------------------------------------------------- #
+
+
+
+# --------------------------------------------------------------- Constants -------------------------------------------------------------- #
+
+LIMIT_MAX_PRODUCTS = 1000
+LIMIT_MAX_REVIEWS  = 2000
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
 
@@ -23,18 +35,31 @@ class AmazonBuddy:
     @classmethod
     def search_products(
         cls,
+
+        # url
         search_term: str,
         category: Category = Category.ALL_DEPARTMENTS,
         sort_type: Optional[SortType] = None,
-        ignored_title_strs: List[str] = [],
-        ignored_asins: List[str] = [],
-        min_price: float = 50.0,
-        min_reviews: int = 5,
-        min_rating: float = 0.0,
+
+        # rh
+        min_rating: Optional[float] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        product_condition: Optional[ProductCondition] = None,
+        include_unavailable: Optional[bool] = None,
+
+        # other js params
         max_results: int = 100,
         user_agent: Optional[str] = None,
         random_ua: bool = True,
         sort: bool = True,
+        min_reviews: Optional[int] = 3,
+        ignored_asins: List[str] = [],
+
+        # post_scrape_filter
+        ignored_title_strs: List[str] = [],
+
+        # other
         debug: bool = False
     ) -> Optional[List[Union[Dict, Product]]]:
         products = cls.__exec_cmd(
@@ -44,9 +69,13 @@ class AmazonBuddy:
             extra_params={
                 '-k': '\'' + search_term + '\'',
                 '-c': category.value,
-                '-n': max_results if max_results <= 500 else 500,
+                '-n': max_results if max_results <= LIMIT_MAX_PRODUCTS else LIMIT_MAX_PRODUCTS,
                 '--productsorttype': sort_type.value if sort_type else None,
-                '--min-rating': min_rating,
+                '--minPrice': min_price,
+                '--maxPrice': max_price,
+                '--minReviewCount': min_reviews,
+                '--ignoredAsins': ','.join(ignored_asins) if ignored_asins and len(ignored_asins) > 0 else None,
+                '--rh': cls.__create_rh(min_rating=min_rating, min_price=min_price, max_price=max_price, product_condition=product_condition, include_unavailable=include_unavailable),
                 '--sort': sort
             },
             debug=debug
@@ -63,15 +92,7 @@ class AmazonBuddy:
 
                 product = Product(product)
 
-                if (
-                    product.price.current < min_price
-                    or
-                    product.rating.count < min_reviews
-                    or
-                    cls.__contains(product.asin, ignored_asins)
-                    or
-                    cls.__contains_in(product.title, ignored_title_strs)
-                ):
+                if (cls.__contains_in(product.title, ignored_title_strs)):
                     continue
 
                 filtered_products.append(product)
@@ -96,7 +117,7 @@ class AmazonBuddy:
             user_agent=user_agent,
             random_ua=random_ua,
             extra_params={
-                '-n': max_results,
+                '-n': max_results if max_results <= LIMIT_MAX_REVIEWS else LIMIT_MAX_REVIEWS,
                 '--min-rating': min_rating,
                 '--sort': sort
             },
@@ -125,6 +146,73 @@ class AmazonBuddy:
 
 
     # ------------------------------------------------------- Private methods -------------------------------------------------------- #
+
+    @classmethod
+    def __create_rh(
+        cls,
+        min_rating: Optional[float] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        product_condition: Optional[ProductCondition] = None,
+        include_unavailable: Optional[bool] = None
+    ) -> Optional[str]:
+        rh_rating = cls.__create_min_rating_rh(min_rating)
+        rh_price = cls.__create_price_rh(min_price, max_price)
+        rh_product_condition = cls.__create_condition_rh(product_condition)
+        rh_include_unavailable = cls.__create_include_unavailable_rh(include_unavailable)
+
+        rhs = []
+
+        if rh_rating:
+            rhs.append('p_72:' + rh_rating)
+
+        if rh_price:
+            rhs.append('p_36:' + rh_price)
+
+        if rh_product_condition:
+            rhs.append('p_n_condition-type:' + rh_product_condition)
+
+        if rh_include_unavailable:
+            rhs.append('p_n_availability:' + rh_include_unavailable)
+
+        return urllib.parse.quote(','.join(rhs)) if len(rhs) > 0 else None
+
+    @staticmethod
+    def __create_min_rating_rh(min_rating: Optional[float] = None) -> Optional[str]:
+        if min_rating:
+            if 1 < min_rating:
+                if min_rating > 4:
+                    min_rating = 4
+
+                return '124891' + str(9-min_rating) + '011'
+
+        return None
+    
+    @staticmethod
+    def __create_price_rh(
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None
+    ) -> Optional[str]:
+        rh = ''
+
+        if min_price and min_price > 0:
+            rh += str(int(min_price * 100)) + '-'
+
+        if max_price and max_price > 0 and (not min_price or min_price < max_price):
+            if len(rh) == 0:
+                rh = '-'
+
+            rh += str(int(max_price * 100))
+
+        return rh if len(rh) > 0 else None
+
+    @staticmethod
+    def __create_condition_rh(product_condition: Optional[ProductCondition] = None) -> Optional[str]:
+        return str(product_condition.value) if product_condition else None
+
+    @staticmethod
+    def __create_include_unavailable_rh(include_unavailable: Optional[bool] = None) -> Optional[str]:
+        return '1248816011' if include_unavailable else None
 
     @classmethod
     def __exec_cmd(
@@ -168,14 +256,16 @@ class AmazonBuddy:
                 return None
 
             # print('path', path)
-        except:
+        except Exception as e:
+            print(e)
+
             return None
 
         if not os.path.exists(path):
             return None
 
         j = kjson.load(path)
-        os.remove(path)
+        # os.remove(path)
 
         return j
     
