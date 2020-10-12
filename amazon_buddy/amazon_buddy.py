@@ -55,6 +55,7 @@ class AmazonBuddy:
         sort: bool = True,
         min_reviews: Optional[int] = 3,
         ignored_asins: List[str] = [],
+        proxies: Optional[List[str]] = None,
 
         # post_scrape_filter
         ignored_title_strs: List[str] = [],
@@ -78,6 +79,7 @@ class AmazonBuddy:
                 '--rh': cls.__create_rh(min_rating=min_rating, min_price=min_price, max_price=max_price, product_condition=product_condition, include_unavailable=include_unavailable),
                 '--sort': sort
             },
+            proxies=proxies,
             debug=debug
         )
 
@@ -110,6 +112,7 @@ class AmazonBuddy:
         user_agent: Optional[str] = None,
         random_ua: bool = True,
         sort: bool = True,
+        proxies: Optional[List[str]] = None,
         debug: bool = False
     ) -> Optional[List[Review]]:
         js = cls.__exec_cmd(
@@ -121,6 +124,7 @@ class AmazonBuddy:
                 '--min-rating': min_rating,
                 '--sort': sort
             },
+            proxies=proxies,
             debug=debug
         )
 
@@ -135,12 +139,14 @@ class AmazonBuddy:
         asin: str,
         user_agent: Optional[str] = None,
         random_ua: bool = True,
+        proxies: Optional[List[str]] = None,
         debug: bool = False
     ) -> Optional[Dict]:
         return cls.__exec_cmd(
             'asin ' + asin,
             user_agent=user_agent,
             random_ua=random_ua,
+            proxies=proxies,
             debug=debug
         )
 
@@ -220,10 +226,12 @@ class AmazonBuddy:
         feature: str,
         user_agent: Optional[str] = None,
         random_ua: bool = True,
+        proxies: Optional[List[str]] = None,
         extra_params: Optional[Dict[str, Any]] = None,
         debug: bool = False
     ) -> Optional[Union[List, Dict]]:
         params = extra_params or {}
+        params['proxy'] = ','.join(proxies) if proxies and len(proxies) > 0 else None
 
         if user_agent:
             params['--ua'] = user_agent
@@ -242,20 +250,7 @@ class AmazonBuddy:
         ).strip()
 
         try:
-            core_file_name = resp.split(' ')[-1].split('_')[0].strip()
-            paths = kpath.file_paths_from_folder(os.getcwd(), allowed_extensions=['.json'])
-            path = None
-
-            for _path in paths:
-                if core_file_name in _path:
-                    path = _path
-
-                    break
-            
-            if path is None:
-                return None
-
-            # print('path', path)
+            path = [l.lstrip().rstrip(',').strip('\'') for l in resp.split('\n') if '.json' in l][0]
         except Exception as e:
             print(e)
 
@@ -265,7 +260,7 @@ class AmazonBuddy:
             return None
 
         j = kjson.load(path)
-        # os.remove(path)
+        os.remove(path)
 
         return j
     
