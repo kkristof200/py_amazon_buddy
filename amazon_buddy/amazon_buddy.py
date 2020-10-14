@@ -250,7 +250,7 @@ class AmazonBuddy:
         ).strip()
 
         try:
-            path = [l.lstrip().rstrip(',').strip('\'') for l in resp.split('\n') if '.json' in l][0]
+            path = resp.split('\'')[1].split('\'')[0]
         except Exception as e:
             print(e)
 
