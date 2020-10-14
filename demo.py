@@ -3,7 +3,7 @@ from amazon_buddy import AmazonBuddy, Category, SortType
 
 from randomua import RandomUA
 
-products = AmazonBuddy.search_products('air mattress', category=Category.HOME_AND_KITCHEN, ignored_title_strs=['$', 'card', 'gift', 'code', 'service', 'currency', '(xbox', 'madden', 'fifa', 'hfl', 'nhl', 'ncaa', 'nba', 'digital', 'iphone', 'ipad', 'free'], min_price=99.0, min_reviews=3, min_rating=3.0, max_results=20, user_agent=RandomUA.random(), sort_type=SortType.PRICE_HIGH_TO_LOW, sort=True, debug=True)
+# products = AmazonBuddy.search_products('air mattress', category=Category.HOME_AND_KITCHEN, ignored_title_strs=['$', 'card', 'gift', 'code', 'service', 'currency', '(xbox', 'madden', 'fifa', 'hfl', 'nhl', 'ncaa', 'nba', 'digital', 'iphone', 'ipad', 'free'], min_price=99.0, min_reviews=3, min_rating=3.0, max_results=20, user_agent=RandomUA.random(), sort_type=SortType.PRICE_HIGH_TO_LOW, sort=True, debug=True)
 
 # AmazonBuddy.search_products(
 #     'rice cooker',
@@ -21,7 +21,7 @@ products = AmazonBuddy.search_products('air mattress', category=Category.HOME_AN
 # for product in products:
 #     product.jsonprint()
 
-print(len(products))
+# print(len(products))
 
 
 # from kcu import kjson
@@ -31,8 +31,8 @@ print(len(products))
 # kjson.save('t.json', details)
 # products[0].jsonprint()
 
-# reviews = AmazonBuddy.get_reviews(asin='B0758GYJK2')
-# reviews[0].jsonprint()
+reviews = AmazonBuddy.get_reviews(asin='B07L52KP31')
+reviews[0].jsonprint()
 
 
 

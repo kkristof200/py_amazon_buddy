@@ -129,7 +129,15 @@ class AmazonBuddy:
         )
 
         if js:
-            return [Review(j) for j in js]
+            reviews = []
+
+            for j in js:
+                try:
+                    reviews.append(Review(j))
+                except:
+                    pass
+
+            return reviews
 
         return None
 
