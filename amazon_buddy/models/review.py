@@ -15,18 +15,19 @@ class Review(JSONCodable):
 
     def __init__(
         self,
-        dict_: dict
+        id: str,
+        name: str,
+        rating: int,
+        helpful_score: int,
+        title: str,
+        text: str
     ):
-        self.id = dict_['id']
-        self.review_data = dict_['review_data']
-        self.name = dict_['name']
-        self.rating = dict_['rating']
-        self.title = dict_['title']
-        self.review = dict_['review']
-
-    @property
-    def text(self) -> str:
-        return self.review
+        self.id = id
+        self.name = name
+        self.rating = rating
+        self.helpful_score = helpful_score
+        self.title = title
+        self.text = text
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
