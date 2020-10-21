@@ -79,8 +79,9 @@ class Parser:
                 try:
                     id = div['id']
                     name = unidecode(html.unescape(div.find('span', class_='a-profile-name').text.strip()))
-                    rating = int(div.find('a', class_='a-link-normal').text.split('.')[0].strip())
-                    title = unidecode(html.unescape(div.find('a', {'data-hook':'review-title'}).find('span').text.strip()))
+
+                    rating = int(div.find('i', class_='a-icon-star').find('span').text.split('.')[0].strip())
+                    title = unidecode(html.unescape(div.find(None, {'data-hook':'review-title'}).find('span').text.strip()))
                     text = unidecode(html.unescape(div.find('span', {'data-hook':'review-body'}).find('span').text.strip()))
 
                     try:

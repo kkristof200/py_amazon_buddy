@@ -122,7 +122,7 @@ class AmazonBuddy:
         asin: str,
 
         # filter
-        min_rating: float = 0.0,
+        min_rating: float = 3.0,
 
         # request
         user_agent: Optional[str] = None,

@@ -44,22 +44,22 @@ class ProductFilter:
         for p in products:
             try:
                 if p.price < self.min_price:
-                    print(p.price, '<', self.min_price)
+                    # print(p.price, '<', self.min_price)
                     continue
                 elif p.price > self.max_price:
-                    print(p.price, '>', self.min_price)
+                    # print(p.price, '>', self.min_price)
                     continue
                 elif p.rating < self.min_rating:
-                    print(p.rating, '<', self.min_rating)
+                    # print(p.rating, '<', self.min_rating)
                     continue
                 elif p.review_count < self.min_reviews:
-                    print(p.review_count, '<', self.min_reviews)
+                    # print(p.review_count, '<', self.min_reviews)
                     continue
                 elif p.asin.lower() in self.ignored_asins:
-                    print('ignored asin', p.asin)
+                    # print('ignored asin', p.asin)
                     continue
                 elif self.__contains_in(p.title, self.ignored_title_strs):
-                    print('ignored title str', p.title)
+                    # print('ignored title str', p.title)
                     continue
 
                 filtered.append(p)
@@ -99,9 +99,26 @@ class ReviewFilter:
         min_rating: Optional[int] = None
     ):
         self.min_rating = min_rating or 0
+        self.ignored_ids = []
 
     def filter(self, reviews: List[Review]) -> List[Review]:
-        return [r for r in reviews if r.rating >= self.min_rating]
+        filtered = []
+
+        for r in reviews:
+            r_id = r.id.lower()
+
+            if r_id in self.ignored_ids:
+                # print('includes')
+                continue
+            
+            if r.rating < self.min_rating:
+                # print('low rating')
+                continue
+
+            self.ignored_ids.append(r_id)
+            filtered.append(r)
+
+        return filtered
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
