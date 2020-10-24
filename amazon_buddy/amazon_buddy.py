@@ -9,7 +9,8 @@ import os, time
 from .enums.category import Category
 from .enums.sort_type import SortType
 
-from .models.product import *
+from .models.search_result_product import SearchResultProduct
+from .models.product import Product
 from .models.review import Review
 
 from .filter import ProductFilter, ReviewFilter
@@ -36,6 +37,8 @@ class AmazonBuddy:
         category: Optional[Union[Category, str]] = Category.ALL_DEPARTMENTS,
 
         # request
+        proxy: Optional[str] = None,
+        proxies: Optional[List[str]] = None,
         user_agent: Optional[str] = None,
 
         # other
@@ -48,7 +51,7 @@ class AmazonBuddy:
 
         return cls.__get_related_searches(
             'https://www.amazon.com/s?k={}&i={}'.format(urllib.parse.quote(search_term), category),
-            Request(user_agent, keep_cookies=True, debug=debug)
+            Request(user_agent, keep_cookies=True, proxy=proxy, proxies=proxies, debug=debug)
         )
 
     @classmethod
@@ -73,13 +76,15 @@ class AmazonBuddy:
         ignored_title_strs: List[str] = [],
 
         # request
+        proxy: Optional[str] = None,
+        proxies: Optional[List[str]] = None,
         user_agent: Optional[str] = None,
 
         # other
         max_results: int = 100,
         use_us_address: bool = True,
         debug: bool = False
-    ) -> Optional[List[Product]]:
+    ) -> Optional[List[SearchResultProduct]]:
         category = category or Category.ALL_DEPARTMENTS
 
         if type(category) == type(Category.ALL_DEPARTMENTS):
@@ -87,7 +92,7 @@ class AmazonBuddy:
 
         base_url = 'https://www.amazon.com/s?k={}&i={}'.format(urllib.parse.quote(search_term), category)
         rh = RH.create_rh(min_price=min_price, max_price=max_price)
-        request = Request(user_agent, keep_cookies=True, debug=debug)
+        request = Request(user_agent, keep_cookies=True, proxy=proxy, proxies=proxies, debug=debug)
         # cat_id, ratings = cls.__get_search_cat_and_ratings(search_term, request)
         suggested_rh = cls.__get_suggested_rh(base_url, min_rating, request)
 
@@ -125,13 +130,15 @@ class AmazonBuddy:
         min_rating: float = 3.0,
 
         # request
+        proxy: Optional[str] = None,
+        proxies: Optional[List[str]] = None,
         user_agent: Optional[str] = None,
 
         # other
         max_results: int = 100,
         debug: bool = False
     ) -> Optional[List[Review]]:
-        request = Request(user_agent, keep_cookies=True, debug=debug)
+        request = Request(user_agent, keep_cookies=True, proxy=proxy, proxies=proxies, debug=debug)
         request.get('https://www.amazon.com/dp/{}'.format(asin))
         base_url = 'https://www.amazon.com/product-reviews/{}?ie=UTF8&reviewerType=all_reviews&sortBy=helpful'.format(asin)
 

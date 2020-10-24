@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup as bs
 from kcu import request, kjson
 
 # Local
-from .models.product import Product
+from .models.search_result_product import SearchResultProduct
 from .models.review import Review
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
@@ -38,7 +38,7 @@ class ProductFilter:
         self.ignored_asins = [ia.lower() for ia in ignored_asins] if ignored_asins else []
         self.ignored_title_strs = [ts.lower() for ts in ignored_title_strs] if ignored_title_strs else []
 
-    def filter(self, products: List[Product]) -> List[Product]:
+    def filter(self, products: List[SearchResultProduct]) -> List[SearchResultProduct]:
         filtered = []
 
         for p in products:

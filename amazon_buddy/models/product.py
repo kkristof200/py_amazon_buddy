@@ -1,7 +1,7 @@
 # --------------------------------------------------------------- Imports ---------------------------------------------------------------- #
 
 # System
-from typing import Optional
+from typing import Optional, List, Dict, Union
 
 # Pip
 from jsoncodable import JSONCodable
@@ -18,19 +18,53 @@ class Product(JSONCodable):
 
     def __init__(
         self,
-        asin: str,
         title: str,
         price: float,
-        rating: Optional[float],
-        review_count: int
+        categories: List[str],
+        features: List[str],
+        details: Dict[str, str],
+        images: Dict[str, Dict[str, Union[str, List[str]]]],
+        video_urls: List[str]
     ):
-        self.asin = asin
-        self.url = 'https://www.amazon.com/dp/' + asin
-
         self.title = title
         self.price = price
-        self.rating = rating
-        self.review_count = review_count
+        self.categories = categories
+        self.features = features
+        self.details = details
+        self.video_urls = video_urls
+        self.images = {}
+        self.asins = []
+        self.image_urls = []
+
+        for asin, image_dict in images.items():
+            self.asins.append(asin)
+
+            image_urls = image_dict['image_urls']
+            self.images[asin] = ProductImageSet(asin, image_dict['name'], image_urls)
+            
+            for image_url in image_urls:
+                if image_url not in self.image_urls:
+                    self.image_urls.append(image_url)
+
+# ---------------------------------------------------------------------------------------------------------------------------------------- #
+
+
+
+# -------------------------------------------------------- class: ProductImageSet -------------------------------------------------------- #
+
+class ProductImageSet(JSONCodable):
+
+    # ------------------------------------------------------------- Init ------------------------------------------------------------- #
+
+    def __init__(
+        self,
+        asin: str,
+        name: str,
+        urls: List[str]
+    ):
+        self.asin = asin
+        self.name = name
+        self.urls = urls
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #

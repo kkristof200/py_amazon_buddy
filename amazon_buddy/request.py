@@ -1,8 +1,9 @@
 # --------------------------------------------------------------- Imports ---------------------------------------------------------------- #
 
 # System
-from typing import Optional
+from typing import Optional, List
 from requests import Response
+import random
 
 # Pip
 from kcu.request import request, RequestMethod
@@ -20,6 +21,8 @@ class Request:
     def __init__(
         self,
         user_agent: Optional[str] = None,
+        proxy: Optional[str] = None,
+        proxies: Optional[List[str]] = None,
         keep_cookies: bool = True,
         debug: bool = False
     ):
@@ -27,6 +30,13 @@ class Request:
         self.cookies = None
         self.keep_cookies = keep_cookies
         self.debug = debug
+
+        if proxy:
+            self.proxy = proxy
+        elif proxies and len(proxies) > 0:
+            self.proxy = random.choice(proxies)
+        else:
+            self.proxy = None
 
     def set_us_address(self):
         self.keep_cookies = True
@@ -65,7 +75,7 @@ class Request:
         if self.cookies:
             headers['Cookie'] = self.cookies
 
-        res = request(url, method, headers=headers, user_agent=self.user_agent, data=body, debug=self.debug, max_request_try_count=2, sleep_time=0.5)
+        res = request(url, method, headers=headers, user_agent=self.user_agent, data=body, debug=self.debug, max_request_try_count=2, sleep_time=0.5, proxy_ftp=self.proxy, proxy_http=self.proxy, proxy_https=self.proxy)
 
         if self.keep_cookies and res and res.cookies:
             cookie_strs = []

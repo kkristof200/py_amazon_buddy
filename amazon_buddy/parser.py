@@ -11,7 +11,7 @@ from kcu import request, kjson
 from unidecode import unidecode
 
 # Local
-from .models.product import Product
+from .models.search_result_product import SearchResultProduct
 from .models.review import Review
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
@@ -24,7 +24,7 @@ class Parser:
     # -------------------------------------------------------- Public methods -------------------------------------------------------- #
 
     @classmethod
-    def parse_products(cls, response: Optional[Response], debug: bool = False) -> List[Product]:
+    def parse_products(cls, response: Optional[Response], debug: bool = False) -> List[SearchResultProduct]:
         if not response or response.status_code not in [200, 201]:
             return []
         
@@ -54,7 +54,7 @@ class Parser:
                         rating = 0
                         review_count = 0
 
-                    products.append(Product(asin, title, price, rating, review_count))
+                    products.append(SearchResultProduct(asin, title, price, rating, review_count))
                 except Exception as e:
                     pass
                     # if debug:
