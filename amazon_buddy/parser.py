@@ -1,18 +1,20 @@
 # --------------------------------------------------------------- Imports ---------------------------------------------------------------- #
 
 # System
-import html
-from typing import Optional, List
+import html, json
+from typing import Optional, List, Dict
 from requests import Response
 
 # Pip
 from bs4 import BeautifulSoup as bs
-from kcu import request, kjson
+from kcu import request, kjson, strings
 from unidecode import unidecode
 
 # Local
 from .models.search_result_product import SearchResultProduct
+from .models.product import Product
 from .models.review import Review
+from .models.review_image import ReviewImage
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
 
@@ -23,6 +25,182 @@ from .models.review import Review
 class Parser:
     # -------------------------------------------------------- Public methods -------------------------------------------------------- #
 
+    @classmethod
+    def parse_product(cls, response: Optional[Response], debug: bool = False) -> Optional[Product]:
+
+        if not response or response.status_code not in [200, 201]:
+            return None
+        
+        categories = []
+        features = []
+        videos = []
+
+        soup = bs(response.content, 'lxml')
+        parsed_json = cls.__json_loads(strings.between(response.text, 'var obj = jQuery.parseJSON(\'', '\')'))
+
+        if parsed_json is None:
+            return None
+        
+        images = parsed_json
+        title = parsed_json['title']
+        asin = parsed_json['mediaAsin']
+        videos = parsed_json['videos']
+
+        try:
+            for feature in soup.find('div', {'class':'a-section a-spacing-medium a-spacing-top-small'}).find_all('span', {'class':'a-list-item'}):
+                try:
+                    features.append(feature.get_text().strip())
+                except:
+                    pass
+        except:
+            pass
+
+        try:
+            categories_container = soup.find('div', {'id':'wayfinding-breadcrumbs_container'})
+
+            for category_a in categories_container.find_all('a', {'class':'a-link-normal a-color-tertiary'}):
+                try:
+                    categories.append(BeautifulSoup(category_a.text, "lxml").text.replace('\\', '/').replace('<', ' ').replace('>', ' ').strip().lower())
+                except:
+                    pass
+        except:
+            pass
+        
+        try:
+            price_text = soup.find('span', {'id':'priceblock_ourprice'}).text.replace('$', '').strip()
+            price = float(price_text)
+        except:
+            price = None
+
+        try:
+            table_for_product_info = soup.find('table', {'id':'productDetails_detailBullets_sections1', 'class':'a-keyvalue prodDetTable'})
+
+            details = {}
+            if table_for_product_info is not None:
+                for tr in table_for_product_info.find_all('tr'):
+                    key = tr.find('th').get_text().strip()
+
+                    if key is not None and key not in ['Customer Reviews', 'Best Sellers Rank']:
+                        value = tr.find('td').get_text().strip()
+                        details[key] = value
+        except:
+            pass
+
+        image_details = {}
+
+        if 'colorToAsin' in images and images['colorToAsin'] is not None:
+            colors = images['colorToAsin']
+
+            for color_name, color_dict in colors.items():
+                _asin = color_dict['asin']
+                image_details[_asin] = {
+                    'name' : color_name,
+                    'image_urls' : []
+                }
+                
+                images_by_color = images['colorImages'][color_name]
+
+                for elem in images_by_color:
+                    if 'hiRes' in elem: 
+                        image_details[_asin]['image_urls'].append(elem['hiRes'])
+
+        for elem in videos:
+            try:
+                video = {}
+                video['url'] = elem['url']
+                video['title'] = elem['title']
+                video['height'] = int(elem['videoHeight'])
+                video['width'] = int(elem['videoWidth'])
+
+                videos.append(video)
+
+            except Exception as e:
+                if debug:
+                    print(e)
+                pass
+          
+        if image_details is None or image_details == {}:
+            try:
+                images_json = cls.__json_loads(strings.between(response.text, '\'colorImages\': { \'initial\': ', '}]},') + '}]')
+
+                if images_json is not None:
+                    image_details[asin] = {
+                        'name' : asin,
+                        'image_urls' : []
+                    }
+
+                    for image_json in images_json:
+                        try:
+                            image_details[asin]['image_urls'].append(image_json['large'])
+                        except Exception as e:
+                            if debug:
+                                print(e)
+                            pass
+            except:
+                pass
+
+        associated_asins = []
+
+        try:
+            associated_asins_json = cls.__json_loads(strings.between(response.text, 'dimensionToAsinMap :', '},').strip() + '}')
+
+            if associated_asins_json is not None:
+                for val in associated_asins_json.values():
+                    associated_asins.append(val)
+        except:
+            pass
+
+        return Product(title, asin, price, categories, features, details, image_details, videos)
+
+    @classmethod
+    def parse_reviews_with_images(cls, response: Optional[Response], debug: bool = False) -> Optional[List[ReviewImage]]:
+        # 'https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin='
+        if not response or response.status_code not in [200, 201]:
+            return None
+            
+        try:
+            reviews_json = cls.__json_loads(response.text)
+        except Exception as e:
+            if debug:
+                print(e)
+
+            return None
+        
+        reviews = {}
+        details = reviews_json['images']
+
+        for elem in details:
+            try:
+                author = elem['associatedReview']['author']['name']
+                text = elem['associatedReview']['text']
+                clean_text = bs(text, "lxml").text.replace('  ', ' ')
+                review_key = elem['associatedReview']['reviewId']
+
+                if review_key in reviews:
+                    review = reviews[review_key]
+                else:
+                    review = {
+                        'author': author,
+                        'text': clean_text,
+                        'rating': elem['associatedReview']['overallRating'],
+                        'image_urls': []
+                    }
+
+                    if 'scores' in elem['associatedReview'] and 'helpfulVotes' in elem['associatedReview']['scores']:
+                        review['upvotes'] = int(elem['associatedReview']['scores']['helpfulVotes'])
+                    else:
+                        review['upvotes'] = 0
+                
+                img_url = elem['mediumImage']
+                review['image_urls'].append(img_url)
+
+                reviews[review_key] = review
+            except:
+                pass
+        
+        return [ReviewImage(r['author'], r['text'], r['rating'], r['image_urls'], r['upvotes']) 
+                for r in sorted(reviews.values(), key=lambda k: k['upvotes'], reverse=True)]
+    
     @classmethod
     def parse_products(cls, response: Optional[Response], debug: bool = False) -> List[SearchResultProduct]:
         if not response or response.status_code not in [200, 201]:
@@ -151,6 +329,18 @@ class Parser:
                 print(e)
 
         return searches
-
+    
+    # -------------------------------------------------------- Public methods -------------------------------------------------------- #
+    @staticmethod
+    def __json_loads(s: str) -> Optional[Dict]:
+        try:
+            return json.loads(s)
+        except:
+            try:
+                return json.loads(s.replace('\\\'', '\''))
+            except Exception as e:
+                print(e)
+        
+        return None
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
