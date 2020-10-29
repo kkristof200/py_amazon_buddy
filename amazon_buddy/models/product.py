@@ -42,7 +42,8 @@ class Product(JSONCodable):
 
         if images:
             for assoc_asin, image_dict in images.items():
-                self.associated_asins.append(assoc_asin)
+                if assoc_asin != asin:
+                    self.associated_asins.append(assoc_asin)
 
                 if assoc_asin not in self.asins:
                     self.asins.append(assoc_asin)
