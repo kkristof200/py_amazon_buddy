@@ -30,8 +30,8 @@ class Product(JSONCodable):
         self.title = title
         self.asin = asin
         self.price = price
-        self.categories = categories
-        self.features = features
+        self.categories = categories or []
+        self.features = features or []
         self.details = details
         self.videos = []
         self.video_urls = []
@@ -40,25 +40,26 @@ class Product(JSONCodable):
         self.asins = [asin]
         self.image_urls = []
 
-        for assoc_asin, image_dict in images.items():
-            self.associated_asins.append(assoc_asin)
+        if images:
+            for assoc_asin, image_dict in images.items():
+                self.associated_asins.append(assoc_asin)
 
-            if assoc_asin not in self.asins:
-                self.asins.append(assoc_asin)
+                if assoc_asin not in self.asins:
+                    self.asins.append(assoc_asin)
 
-            if image_dict is not None and 'image_urls' in image_dict:
-                image_urls = image_dict['image_urls']
-                self.images[assoc_asin] = ProductImageSet(assoc_asin, image_dict['name'], image_urls)
-            
-                for image_url in image_urls:
-                    if image_url not in self.image_urls:
-                        self.image_urls.append(image_url)
-        
-        for video in videos_details:
+                if image_dict is not None and 'image_urls' in image_dict:
+                    image_urls = image_dict['image_urls']
+                    self.images[assoc_asin] = ProductImageSet(assoc_asin, image_dict['name'], image_urls)
                 
-            if 'title' in video and 'height' in video and 'width' in video and 'url' in video:
-                self.videos.append(ProductVideo(video['url'], video['title'], video['height'], video['width']))
-                self.video_urls.append(video['url'])
+                    for image_url in image_urls:
+                        if image_url not in self.image_urls:
+                            self.image_urls.append(image_url)
+
+        if videos_details:
+            for video in videos_details:
+                if 'title' in video and 'height' in video and 'width' in video and 'url' in video:
+                    self.videos.append(ProductVideo(video['url'], video['title'], video['height'], video['width']))
+                    self.video_urls.append(video['url'])
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
