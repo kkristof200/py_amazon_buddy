@@ -2,32 +2,31 @@
 
 # Pip
 from jsoncodable import JSONCodable
+from typing import List, Optional
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
 
 
 
-# ------------------------------------------------------------ class: Review ------------------------------------------------------------- #
+# ------------------------------------------------------------ class: ReviewImage -------------------------------------------------------- #
 
-class Review(JSONCodable):
+class ReviewImage(JSONCodable):
 
     # ------------------------------------------------------------- Init ------------------------------------------------------------- #
 
     def __init__(
         self,
-        id: str,
-        name: str,
+        author: str,
+        text: str,
         rating: int,
-        upvotes: int,
-        title: str,
-        text: str
+        image_urls: List[str],
+        upvotes: int
     ):
-        self.id = id
-        self.name = name
-        self.rating = rating
-        self.upvotes = upvotes
-        self.title = title
+        self.author = author
         self.text = text
+        self.rating = rating
+        self.image_urls = image_urls
+        self.upvotes = upvotes
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #

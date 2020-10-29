@@ -12,6 +12,7 @@ from .enums.sort_type import SortType
 from .models.search_result_product import SearchResultProduct
 from .models.product import Product
 from .models.review import Review
+from .models.review_image import ReviewImage
 
 from .filter import ProductFilter, ReviewFilter
 from .parser import Parser
@@ -27,6 +28,64 @@ from .rh import RH
 class AmazonBuddy:
 
     # -------------------------------------------------------- Public methods -------------------------------------------------------- #
+    @classmethod
+    def get_product_details(
+        cls,
+
+        #url
+        asin: str,
+
+        # request
+        proxy: Optional[str] = None,
+        proxies: Optional[List[str]] = None,
+        user_agent: Optional[str] = None,
+        
+        # other
+        debug: bool = False
+    ) -> Optional[Product]:
+        try:
+            return Parser.parse_product(
+                Request(
+                    user_agent,
+                    keep_cookies=True,
+                    proxy=proxy,
+                    proxies=proxies,
+                    debug=debug
+                ).get('https://www.amazon.com/dp/{}'.format(asin)),
+                debug=debug
+            )
+        except Exception as e:
+            if debug:
+                print(e)
+            
+            return None
+        
+    @classmethod
+    def get_product_reviews_with_images(
+        cls,
+        
+        # url
+        asin: str,
+
+        # request
+        proxy: Optional[str] = None,
+        proxies: Optional[List[str]] = None,
+        user_agent: Optional[str] = None,
+        
+        # other
+        debug: bool = False
+    ) -> Optional[List[ReviewImage]]:
+        
+        return Parser.parse_reviews_with_images(
+            Request(
+                user_agent, 
+                keep_cookies=True, 
+                proxy=proxy, 
+                proxies=proxies, 
+                debug=debug
+            ).get('https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin={}'.format(asin)), 
+            debug=debug
+        )
 
     @classmethod
     def get_related_searches(
@@ -208,14 +267,29 @@ class AmazonBuddy:
         current_try = 1
 
         while current_try <= max_try:
-            rh = Parser.parse_related_searches(request.get(url), debug=request.debug)
+            rs = Parser.parse_related_searches(request.get(url), debug=request.debug)
 
-            if rh:
-                return rh
+            if rs:
+                return rs
 
             time.sleep(1)
             current_try += 1
 
         return []
 
+
+    @staticmethod
+    def __get_product_reviews_with_images(url: str, request: Request, max_try: int = 3) -> Optional[List[ReviewImage]]:
+        current_try = 1
+
+        while current_try <= max_try:
+            reviews = Parser.parse_reviews_with_images(request.get(url), debug=request.debug)
+
+            if reviews:
+                return reviews
+
+            time.sleep(1)
+            current_try += 1
+
+        return None
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
