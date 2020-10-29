@@ -28,6 +28,7 @@ from .rh import RH
 class AmazonBuddy:
 
     # -------------------------------------------------------- Public methods -------------------------------------------------------- #
+
     @classmethod
     def get_product_details(
         cls,
@@ -36,10 +37,9 @@ class AmazonBuddy:
         asin: str,
 
         # request
-        proxy: Optional[str] = None,
-        proxies: Optional[List[str]] = None,
+        proxy: Optional[Union[str, List[str]]] = None,
         user_agent: Optional[str] = None,
-        
+
         # other
         debug: bool = False
     ) -> Optional[Product]:
@@ -49,7 +49,6 @@ class AmazonBuddy:
                     user_agent,
                     keep_cookies=True,
                     proxy=proxy,
-                    proxies=proxies,
                     debug=debug
                 ).get('https://www.amazon.com/dp/{}'.format(asin)),
                 debug=debug
@@ -57,35 +56,38 @@ class AmazonBuddy:
         except Exception as e:
             if debug:
                 print(e)
-            
+
             return None
-        
+
     @classmethod
     def get_product_reviews_with_images(
         cls,
-        
+
         # url
         asin: str,
 
         # request
-        proxy: Optional[str] = None,
-        proxies: Optional[List[str]] = None,
+        proxy: Optional[Union[str, List[str]]] = None,
         user_agent: Optional[str] = None,
         
         # other
         debug: bool = False
     ) -> Optional[List[ReviewImage]]:
-        
-        return Parser.parse_reviews_with_images(
-            Request(
-                user_agent, 
-                keep_cookies=True, 
-                proxy=proxy, 
-                proxies=proxies, 
+        try:
+            return Parser.parse_reviews_with_images(
+                Request(
+                    user_agent, 
+                    keep_cookies=True, 
+                    proxy=proxy, 
+                    debug=debug
+                ).get('https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin={}'.format(asin)), 
                 debug=debug
-            ).get('https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin={}'.format(asin)), 
-            debug=debug
-        )
+            )
+        except Exception as e:
+            if debug:
+                print(e)
+
+            return None
 
     @classmethod
     def get_related_searches(
@@ -96,13 +98,12 @@ class AmazonBuddy:
         category: Optional[Union[Category, str]] = Category.ALL_DEPARTMENTS,
 
         # request
-        proxy: Optional[str] = None,
-        proxies: Optional[List[str]] = None,
+        proxy: Optional[Union[str, List[str]]] = None,
         user_agent: Optional[str] = None,
 
         # other
         debug: bool = False
-    ) -> List[str]:
+    ) -> Optional[List[str]]:
         category = category or Category.ALL_DEPARTMENTS
 
         if type(category) == type(Category.ALL_DEPARTMENTS):
@@ -110,8 +111,49 @@ class AmazonBuddy:
 
         return cls.__get_related_searches(
             'https://www.amazon.com/s?k={}&i={}'.format(urllib.parse.quote(search_term), category),
-            Request(user_agent, keep_cookies=True, proxy=proxy, proxies=proxies, debug=debug)
+            Request(user_agent, keep_cookies=True, proxy=proxy, debug=debug)
         )
+
+    @classmethod
+    def get_trends(
+        cls,
+
+        # url
+        category: Optional[Union[Category, str]] = Category.ALL_DEPARTMENTS,
+        locale: str = 'en_US',
+        search_letters: str = 'abcdefghijklmnopqrstuvwxyz',
+
+        # request
+        proxy: Optional[Union[str, List[str]]] = None,
+        user_agent: Optional[str] = None,
+
+        # other
+        return_dict: bool = False,
+        max_results_per_letter: int = 10,
+        debug: bool = False
+    ) -> Union[List[str], Dict[str, List[str]]]:
+        suggestions = {}
+        request = Request(proxy, user_agent, keep_cookies=True, debug=debug)
+
+        for char in search_letters:
+            suggestions[str(char)] = cls.__get_suggestions(
+                category,
+                str(char),
+                locale,
+                max_results_per_letter,
+                request,
+                debug
+            )
+
+        if return_dict:
+            return suggestions
+        else:
+            suggestions_ = []
+
+            for v in suggestions.values():
+                suggestions_.extend(v)
+
+            return suggestions_
 
     @classmethod
     def search_products(
@@ -135,8 +177,7 @@ class AmazonBuddy:
         ignored_title_strs: List[str] = [],
 
         # request
-        proxy: Optional[str] = None,
-        proxies: Optional[List[str]] = None,
+        proxy: Optional[Union[str, List[str]]] = None,
         user_agent: Optional[str] = None,
 
         # other
@@ -151,7 +192,7 @@ class AmazonBuddy:
 
         base_url = 'https://www.amazon.com/s?k={}&i={}'.format(urllib.parse.quote(search_term), category)
         rh = RH.create_rh(min_price=min_price, max_price=max_price)
-        request = Request(user_agent, keep_cookies=True, proxy=proxy, proxies=proxies, debug=debug)
+        request = Request(user_agent, keep_cookies=True, proxy=proxy, debug=debug)
         # cat_id, ratings = cls.__get_search_cat_and_ratings(search_term, request)
         suggested_rh = cls.__get_suggested_rh(base_url, min_rating, request)
 
@@ -189,15 +230,14 @@ class AmazonBuddy:
         min_rating: float = 3.0,
 
         # request
-        proxy: Optional[str] = None,
-        proxies: Optional[List[str]] = None,
+        proxy: Optional[Union[str, List[str]]] = None,
         user_agent: Optional[str] = None,
 
         # other
         max_results: int = 100,
         debug: bool = False
     ) -> Optional[List[Review]]:
-        request = Request(user_agent, keep_cookies=True, proxy=proxy, proxies=proxies, debug=debug)
+        request = Request(user_agent, keep_cookies=True, proxy=proxy, debug=debug)
         request.get('https://www.amazon.com/dp/{}'.format(asin))
         base_url = 'https://www.amazon.com/product-reviews/{}?ie=UTF8&reviewerType=all_reviews&sortBy=helpful'.format(asin)
 
@@ -224,20 +264,14 @@ class AmazonBuddy:
             if debug:
                 print('URL: {} - Found {}|{}|{} - Page {}'.format(url, len(new_elements), len(filtered), len(l), p), end='\n')
 
-            if len(new_elements) < 7:
+            if len(new_elements) < 20 or (p > 25 and len(filtered) == 0):
                 if current_try >= max_try:
                     return l
 
-                current_try += 1
-                time.sleep(1)
-                continue
-            elif p > 25 and len(filtered) == 0:
-                if current_try >= max_try:
-                    return l
-
-                current_try += 1
                 p += 1
+                current_try += 1
                 time.sleep(1)
+
                 continue
 
             p += 1
@@ -263,7 +297,7 @@ class AmazonBuddy:
         return None
     
     @staticmethod
-    def __get_related_searches(url: str, request: Request, max_try: int = 3) -> List[str]:
+    def __get_related_searches(url: str, request: Request, max_try: int = 3) -> Optional[List[str]]:
         current_try = 1
 
         while current_try <= max_try:
@@ -275,7 +309,7 @@ class AmazonBuddy:
             time.sleep(1)
             current_try += 1
 
-        return []
+        return None
 
 
     @staticmethod
@@ -292,4 +326,33 @@ class AmazonBuddy:
             current_try += 1
 
         return None
+
+    @staticmethod
+    def __get_suggestions(category: Category, letter: str, locale: str, max_results: int, request: Request, debug: bool) -> List[str]:
+        import time
+        from kcu import request
+
+        url = 'https://completion.amazon.com/api/2017/suggestions?lop={}&site-variant=desktop&client-info=amazon-search-ui&mid=ATVPDKIKX0DER&alias={}&ks=65&prefix={}&event=onKeyPress&limit=11&fb=1&suggestion-type=KEYWORD&_={}'.format(locale, category.value, letter, int(time.time()))
+        suggestions = []
+
+        try:
+            j = request.get(url, debug=debug).json()
+
+            for suggestion in j['suggestions']:
+                suggestion = suggestion['value']
+
+                if suggestion not in suggestions:
+                    suggestions.append(suggestion)
+
+                    if len(suggestions) >= max_results:
+                        return suggestions
+
+            return suggestions
+        except Exception as e:
+            if debug:
+                print(e)
+
+            return suggestions
+
+
 # ---------------------------------------------------------------------------------------------------------------------------------------- #

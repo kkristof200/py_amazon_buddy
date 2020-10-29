@@ -23,11 +23,11 @@ from .models.review_image import ReviewImage
 # ------------------------------------------------------------ class: Parser ------------------------------------------------------------- #
 
 class Parser:
+
     # -------------------------------------------------------- Public methods -------------------------------------------------------- #
 
     @classmethod
     def parse_product(cls, response: Optional[Response], debug: bool = False) -> Optional[Product]:
-
         if not response or response.status_code not in [200, 201]:
             return None
         

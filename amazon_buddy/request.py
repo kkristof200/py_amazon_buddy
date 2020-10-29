@@ -1,7 +1,7 @@
 # --------------------------------------------------------------- Imports ---------------------------------------------------------------- #
 
 # System
-from typing import Optional, List
+from typing import Optional, List, Union
 from requests import Response
 import random
 
@@ -21,8 +21,7 @@ class Request:
     def __init__(
         self,
         user_agent: Optional[str] = None,
-        proxy: Optional[str] = None,
-        proxies: Optional[List[str]] = None,
+        proxy: Optional[Union[str, List[str]]] = None,
         keep_cookies: bool = True,
         debug: bool = False
     ):
@@ -31,12 +30,10 @@ class Request:
         self.keep_cookies = keep_cookies
         self.debug = debug
 
-        if proxy:
-            self.proxy = proxy
-        elif proxies and len(proxies) > 0:
-            self.proxy = random.choice(proxies)
-        else:
-            self.proxy = None
+        if type(proxy) == list:
+            proxy = random.choice(proxy) if len(proxy) > 0 else None
+
+        self.proxy = proxy
 
     def set_us_address(self):
         self.keep_cookies = True
