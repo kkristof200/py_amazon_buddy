@@ -43,11 +43,22 @@ class AmazonBuddy:
         # other
         debug: bool = False
     ) -> Optional[Product]:
-
-        return cls.__get_product_details(
-            'https://www.amazon.com/dp/{}'.format(asin), 
-            Request(user_agent, keep_cookies=True, proxy=proxy, proxies=proxies, debug=debug)
-        )
+        try:
+            return Parser.parse_product(
+                Request(
+                    user_agent,
+                    keep_cookies=True,
+                    proxy=proxy,
+                    proxies=proxies,
+                    debug=debug
+                ).get('https://www.amazon.com/dp/{}'.format(asin)),
+                debug=debug
+            )
+        except Exception as e:
+            if debug:
+                print(e)
+            
+            return None
         
     @classmethod
     def get_product_reviews_with_images(
@@ -64,10 +75,16 @@ class AmazonBuddy:
         # other
         debug: bool = False
     ) -> Optional[List[ReviewImage]]:
-
-        return cls.__get_product_reviews_with_images(
-            'https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin={}'.format(asin), 
-            Request(user_agent, keep_cookies=True, proxy=proxy, proxies=proxies, debug=debug)
+        
+        return Parser.parse_reviews_with_images(
+            Request(
+                user_agent, 
+                keep_cookies=True, 
+                proxy=proxy, 
+                proxies=proxies, 
+                debug=debug
+            ).get('https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin={}'.format(asin)), 
+            debug=debug
         )
 
     @classmethod
@@ -259,21 +276,7 @@ class AmazonBuddy:
             current_try += 1
 
         return []
-    
-    @staticmethod
-    def __get_product_details(url: str, request: Request, max_try: int = 3) -> Optional[Product]:
-        current_try = 1
 
-        while current_try <= max_try:
-            product = Parser.parse_product(request.get(url), debug=request.debug)
-
-            if product:
-                return product
-
-            time.sleep(1)
-            current_try += 1
-
-        return None
 
     @staticmethod
     def __get_product_reviews_with_images(url: str, request: Request, max_try: int = 3) -> Optional[List[ReviewImage]]:

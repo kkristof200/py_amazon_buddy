@@ -52,8 +52,9 @@ class Parser:
                     features.append(feature.get_text().strip())
                 except:
                     pass
-        except:
-            pass
+        except Exception as e:
+            if debug:
+                print(e)
 
         try:
             categories_container = soup.find('div', {'id':'wayfinding-breadcrumbs_container'})
@@ -63,8 +64,9 @@ class Parser:
                     categories.append(BeautifulSoup(category_a.text, "lxml").text.replace('\\', '/').replace('<', ' ').replace('>', ' ').strip().lower())
                 except:
                     pass
-        except:
-            pass
+        except Exception as e:
+            if debug:
+                print(e)
         
         try:
             price_text = soup.find('span', {'id':'priceblock_ourprice'}).text.replace('$', '').strip()
@@ -117,7 +119,6 @@ class Parser:
             except Exception as e:
                 if debug:
                     print(e)
-                pass
           
         if image_details is None or image_details == {}:
             try:
@@ -135,7 +136,6 @@ class Parser:
                         except Exception as e:
                             if debug:
                                 print(e)
-                            pass
             except:
                 pass
 
@@ -195,8 +195,9 @@ class Parser:
                 review['image_urls'].append(img_url)
 
                 reviews[review_key] = review
-            except:
-                pass
+            except Exception as e:
+                if debug:
+                    print(e)
         
         return [ReviewImage(r['author'], r['text'], r['rating'], r['image_urls'], r['upvotes']) 
                 for r in sorted(reviews.values(), key=lambda k: k['upvotes'], reverse=True)]

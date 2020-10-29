@@ -51,11 +51,10 @@ class Product(JSONCodable):
                         self.image_urls.append(image_url)
         
         for video in videos_details:
-            if 'url' in video:
+                
+            if 'title' in video and 'height' in video and 'width' in video and 'url' in video:
+                self.videos.append(ProductVideo(video['url'], video['title'], video['height'], video['width']))
                 self.video_urls.append(video['url'])
-
-                if 'title' in video and 'height' in video and 'width' in video:
-                    self.videos.append(ProductVideo(video['url'], video['title'], video['height'], video['width']))
         
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
