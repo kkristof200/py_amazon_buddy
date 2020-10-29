@@ -37,10 +37,14 @@ class Product(JSONCodable):
         self.video_urls = []
         self.images = {}
         self.associated_asins = []
+        self.asins = [asin]
         self.image_urls = []
 
         for assoc_asin, image_dict in images.items():
             self.associated_asins.append(assoc_asin)
+
+            if assoc_asin not in self.asins:
+                self.asins.append(assoc_asin)
 
             if image_dict is not None and 'image_urls' in image_dict:
                 image_urls = image_dict['image_urls']
@@ -55,7 +59,7 @@ class Product(JSONCodable):
             if 'title' in video and 'height' in video and 'width' in video and 'url' in video:
                 self.videos.append(ProductVideo(video['url'], video['title'], video['height'], video['width']))
                 self.video_urls.append(video['url'])
-        
+
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
 
