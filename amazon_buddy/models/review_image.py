@@ -20,8 +20,7 @@ class ReviewImage(JSONCodable):
         text: str,
         rating: int,
         image_urls: List[str],
-        upvotes: int,
-
+        upvotes: int
     ):
         self.author = author
         self.text = text
@@ -30,4 +29,4 @@ class ReviewImage(JSONCodable):
         self.upvotes = upvotes
 
 
-# --------------------------------------------------------------------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------------------------------------------------------------------- #
