@@ -42,7 +42,7 @@ class Parser:
             return None
         
         images = parsed_json
-        title = parsed_json['title']
+        title = parsed_json['title'].strip()
         asin = parsed_json['mediaAsin']
         videos = parsed_json['videos']
 
@@ -57,11 +57,9 @@ class Parser:
                 print(e)
 
         try:
-            categories_container = soup.find('div', {'id':'wayfinding-breadcrumbs_container'})
-
-            for category_a in categories_container.find_all('a', {'class':'a-link-normal a-color-tertiary'}):
+            for cat_a in soup.find('div', {'id':'wayfinding-breadcrumbs_container'}).find_all('a', class_='a-link-normal a-color-tertiary'):
                 try:
-                    categories.append(BeautifulSoup(category_a.text, "lxml").text.replace('\\', '/').replace('<', ' ').replace('>', ' ').strip().lower())
+                    categories.append(bs(cat_a.text, "lxml").text.replace('\\', '/').replace('<', ' ').replace('>', ' ').strip().lower())
                 except:
                     pass
         except Exception as e:
@@ -106,16 +104,24 @@ class Parser:
                     if 'hiRes' in elem: 
                         image_details[_asin]['image_urls'].append(elem['hiRes'])
 
+        added_video_urls = []
+
         for elem in videos:
             try:
-                video = {}
-                video['url'] = elem['url']
-                video['title'] = elem['title']
-                video['height'] = int(elem['videoHeight'])
-                video['width'] = int(elem['videoWidth'])
+                vid_url = elem['url']
+                print(vid_url)
+
+                if vid_url in added_video_urls:
+                    continue
+
+                video = {'url':vid_url}
+
+                video['title'] = elem['title'].strip()
+                video['height'] = int(elem['videoHeight'] if 'videoHeight' in elem else elem['height'])
+                video['width'] = int(elem['videoWidth'] if 'videoWidth' in elem else elem['width'])
 
                 videos.append(video)
-
+                added_video_urls.append(vid_url)
             except Exception as e:
                 if debug:
                     print(e)

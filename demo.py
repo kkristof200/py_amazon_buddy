@@ -15,7 +15,8 @@ from amazon_buddy import AmazonBuddy, Category, SortType
 
 # print(AmazonBuddy.get_related_searches('electric bike', category=Category.ALL_DEPARTMENTS, debug=True))
 
-# reviews = AmazonBuddy.get_reviews(asin='B07PBKYGMR', debug=True)
+AmazonBuddy.get_product_details(asin='B07XMMQ1VP', debug=True).jsonprint()
+# AmazonBuddy.get_product_details(asin='B07XJB7CG3', user_agent=RandomUA.random(), debug=True).jsonprint()
 # print(len(reviews))
 
 # [r.jsonprint() for r in AmazonBuddy.get_product_reviews_with_images(asin='B07N6S4SY1', debug=True)]

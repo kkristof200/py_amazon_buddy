@@ -9,14 +9,14 @@ else:
 
 setuptools.setup(
     name="amazon_buddy",
-    version="0.0.27",
+    version="0.0.28",
     author="Kristof",
     description="python wrapper for the amazon_buddy npm package",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/kkristof200/py_amazon_buddy",
     packages=setuptools.find_packages(),
-    install_requires=["Unidecode", "jsoncodable", "requests", "kcu", "beautifulsoup4"],
+    install_requires=["jsoncodable", "requests", "kcu", "Unidecode", "beautifulsoup4"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
