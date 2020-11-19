@@ -194,7 +194,7 @@ class AmazonBuddy:
         rh = RH.create_rh(min_price=min_price, max_price=max_price)
         request = Request(user_agent, keep_cookies=True, proxy=proxy, debug=debug)
         # cat_id, ratings = cls.__get_search_cat_and_ratings(search_term, request)
-        suggested_rh = cls.__get_suggested_rh(base_url, min_rating, request)
+        suggested_rh = cls.__get_suggested_rh(base_url, min_rating, request) if min_rating else None
 
         if suggested_rh:
             rh = suggested_rh + ('%2C' + rh) if rh else ''
@@ -248,13 +248,14 @@ class AmazonBuddy:
 
     @staticmethod
     def __solve(base_url: str, page_param_name: str, request: Request, filter, parse: Callable, max_results: int, debug: bool = False) -> List:
-        p = 1
+        p = 0
         l = []
         max_try = 3
         current_try = 1
         max_p = 50
 
         while len(l) < max_results and p <= max_p:
+            p += 1
             url = base_url + '&{}={}'.format(page_param_name, p)
             request.debug = False
             new_elements = parse(request.get(url), debug=True)
@@ -268,21 +269,24 @@ class AmazonBuddy:
                 if current_try >= max_try:
                     return l
 
-                p += 1
                 current_try += 1
                 time.sleep(1)
 
                 continue
 
-            p += 1
             current_try = 1
 
-        print(' Found {} - Page {}'.format(len(l), p))
+        print('Found {} - pages checked {}'.format(len(l), p))
 
         return l if len(l) > 0 else None
 
     @staticmethod
-    def __get_suggested_rh(url: str, min_rating: int, request: Request, max_try: int = 3) -> Optional[str]:
+    def __get_suggested_rh(
+        url: str,
+        min_rating: int,
+        request: Request,
+        max_try: int = 3
+    ) -> Optional[str]:
         current_try = 1
 
         while current_try <= max_try:
