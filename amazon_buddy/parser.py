@@ -109,7 +109,6 @@ class Parser:
         for elem in videos:
             try:
                 vid_url = elem['url']
-                print(vid_url)
 
                 if vid_url in added_video_urls:
                     continue

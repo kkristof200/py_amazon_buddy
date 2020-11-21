@@ -74,6 +74,9 @@ class Request:
 
         res = request(url, method, headers=headers, user_agent=self.user_agent, data=body, debug=self.debug, max_request_try_count=2, sleep_time=0.5, proxy_ftp=self.proxy, proxy_http=self.proxy, proxy_https=self.proxy)
 
+        # import json
+        # print(json.dumps(dict(res.request.headers), indent=4))
+
         if self.keep_cookies and res and res.cookies:
             cookie_strs = []
 

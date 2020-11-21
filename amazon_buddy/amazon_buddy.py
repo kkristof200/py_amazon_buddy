@@ -121,7 +121,7 @@ class AmazonBuddy:
         # url
         category: Optional[Union[Category, str]] = Category.ALL_DEPARTMENTS,
         locale: str = 'en_US',
-        search_letters: str = 'abcdefghijklmnopqrstuvwxyz',
+        search_params: Union[str, List[str]] = 'abcdefghijklmnopqrstuvwxyz',
 
         # request
         proxy: Optional[Union[str, List[str]]] = None,
@@ -135,10 +135,10 @@ class AmazonBuddy:
         suggestions = {}
         request = Request(proxy, user_agent, keep_cookies=True, debug=debug)
 
-        for char in search_letters:
-            suggestions[str(char)] = cls.__get_suggestions(
+        for param in search_params:
+            suggestions[str(param)] = cls.__get_suggestions(
                 category,
-                str(char),
+                str(param),
                 locale,
                 max_results_per_letter,
                 request,
