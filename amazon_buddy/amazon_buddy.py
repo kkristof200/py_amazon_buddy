@@ -307,7 +307,7 @@ class AmazonBuddy:
         while current_try <= max_try:
             rs = Parser.parse_related_searches(request.get(url), debug=request.debug)
 
-            if rs:
+            if rs is not None:
                 return rs
 
             time.sleep(1)

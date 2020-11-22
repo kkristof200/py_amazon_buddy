@@ -334,6 +334,8 @@ class Parser:
             if debug:
                 print(e)
 
+            return None
+
         return searches
     
     # -------------------------------------------------------- Private methods -------------------------------------------------------- #
