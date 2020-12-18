@@ -17,12 +17,19 @@ pip3 install amazon_buddy
 ## Usage
 
 ~~~~python
-import json
 from amazon_buddy import AmazonBuddy, Category, SortType
 
-products = AmazonBuddy.search_products('face wash', sort_type=SortType.PRICE_HIGH_TO_LOW, min_price=0, category=Category.BEAUTY_AND_PERSONAL_CARE, max_results=1000, debug=True)
-print(products)
+ab = AmazonBuddy(debug=True)
 
-reviews = AmazonBuddy.get_reviews(asin='B0758GYJK2')
+products = ab.search_products(
+    'face wash',
+    sort_type=SortType.PRICE_HIGH_TO_LOW,
+    min_price=0,
+    category=Category.BEAUTY_AND_PERSONAL_CARE,
+    max_results=1000
+)
+print(len(products))
+
+reviews = ab.get_reviews(asin='B0758GYJK2')
 print(reviews)
 ~~~~
