@@ -99,7 +99,7 @@ class AmazonBuddy(Api):
 
             return Parser.parse_reviews_with_images(
                 self._post(
-                    'https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin={}'.format(asin),
+                    'https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin',
                     body=data,
                     extra_headers={
                         'Accept': '*/*',
