@@ -99,7 +99,7 @@ class AmazonBuddy(Api):
 
             return Parser.parse_reviews_with_images(
                 self._post(
-                    'https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin'.format(asin),
+                    'https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin={}'.format(asin),
                     body=data,
                     extra_headers={
                         'Accept': '*/*',
@@ -260,7 +260,7 @@ class AmazonBuddy(Api):
         #     pass
         # else:
         #     base_url += 'i={}'.format(urllib.parse.quote(category.value))
-        
+
         if sort_type:
             base_url += '&s={}'.format(sort_type.value)
 
@@ -289,7 +289,6 @@ class AmazonBuddy(Api):
         max_results: int = 100,
         debug: bool = False
     ) -> Optional[List[Review]]:
-        # self.get('https://www.amazon.com/dp/{}'.format(asin))
         base_url = 'https://www.amazon.com/product-reviews/{}?ie=UTF8&reviewerType=all_reviews&sortBy=helpful'.format(asin)
 
         return self.__solve(base_url, 'pageNumber', ReviewFilter(min_rating), Parser.parse_reviews, max_results)
