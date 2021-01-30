@@ -30,7 +30,7 @@ class Parser:
     def parse_product(cls, response: Optional[Response], debug: bool = False) -> Optional[Product]:
         if not response or response.status_code not in [200, 201]:
             return None
-        
+
         categories = []
         features = []
         videos = []
@@ -40,7 +40,7 @@ class Parser:
 
         if parsed_json is None:
             return None
-        
+
         images = parsed_json
         title = parsed_json['title'].strip()
         asin = parsed_json['mediaAsin']
@@ -65,7 +65,7 @@ class Parser:
         except Exception as e:
             if debug:
                 print(e)
-        
+
         try:
             price_text = soup.find('span', {'id':'priceblock_ourprice'}).text.replace('$', '').strip()
             price = float(price_text)
@@ -97,11 +97,11 @@ class Parser:
                     'name' : color_name,
                     'image_urls' : []
                 }
-                
+
                 images_by_color = images['colorImages'][color_name]
 
                 for elem in images_by_color:
-                    if 'hiRes' in elem: 
+                    if 'hiRes' in elem:
                         image_details[_asin]['image_urls'].append(elem['hiRes'])
 
         added_video_urls = []
@@ -124,7 +124,7 @@ class Parser:
             except Exception as e:
                 if debug:
                     print(e)
-          
+
         if image_details is None or image_details == {}:
             try:
                 images_json = cls.__json_loads(strings.between(response.text, '\'colorImages\': { \'initial\': ', '}]},') + '}]')
@@ -162,7 +162,7 @@ class Parser:
         # 'https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin='
         if not response or response.status_code not in [200, 201]:
             return None
-            
+
         try:
             reviews_json = cls.__json_loads(response.text)
         except Exception as e:
@@ -170,7 +170,7 @@ class Parser:
                 print(e)
 
             return None
-        
+
         reviews = {}
         details = reviews_json['images']
 
@@ -195,7 +195,7 @@ class Parser:
                         review['upvotes'] = int(elem['associatedReview']['scores']['helpfulVotes'])
                     else:
                         review['upvotes'] = 0
-                
+
                 img_url = elem['mediumImage']
                 review['image_urls'].append(img_url)
 
@@ -203,15 +203,15 @@ class Parser:
             except Exception as e:
                 if debug:
                     print(e)
-        
-        return [ReviewImage(r['author'], r['text'], r['rating'], r['image_urls'], r['upvotes']) 
+
+        return [ReviewImage(r['author'], r['text'], r['rating'], r['image_urls'], r['upvotes'])
                 for r in sorted(reviews.values(), key=lambda k: k['upvotes'], reverse=True)]
-    
+
     @classmethod
     def parse_products(cls, response: Optional[Response], debug: bool = False) -> List[SearchResultProduct]:
         if not response or response.status_code not in [200, 201]:
             return []
-        
+
         products = []
 
         try:
@@ -272,7 +272,7 @@ class Parser:
                         helpful_score = int(div.find('span', {'data-hook':'review-vote-statement'}.text.split(' ')[0]))
                     except:
                         helpful_score = 0
-                    
+
                     reviews.append(Review(id, name, rating, helpful_score, title, text))
                 except Exception as e:
                     if debug:
@@ -308,7 +308,7 @@ class Parser:
                 print(e)
 
         return None
-    
+
     @classmethod
     def parse_related_searches(cls, response: Optional[Response], debug: bool = False) -> Optional[List[str]]:
         if not response or response.status_code not in [200, 201]:
@@ -337,7 +337,7 @@ class Parser:
             return None
 
         return searches
-    
+
     # -------------------------------------------------------- Private methods -------------------------------------------------------- #
     @staticmethod
     def __json_loads(s: str) -> Optional[Dict]:
@@ -348,7 +348,7 @@ class Parser:
                 return json.loads(s.replace('\\\'', '\''))
             except Exception as e:
                 print(e)
-        
+
         return None
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #

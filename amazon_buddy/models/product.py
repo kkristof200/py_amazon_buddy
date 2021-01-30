@@ -51,7 +51,7 @@ class Product(JSONCodable):
                 if image_dict is not None and 'image_urls' in image_dict:
                     image_urls = image_dict['image_urls']
                     self.images[assoc_asin] = ProductImageSet(assoc_asin, image_dict['name'], image_urls)
-                
+
                     for image_url in image_urls:
                         if image_url not in self.image_urls:
                             self.image_urls.append(image_url)

@@ -110,7 +110,7 @@ class ReviewFilter:
             if r_id in self.ignored_ids:
                 # print('includes')
                 continue
-            
+
             if r.rating < self.min_rating:
                 # print('low rating')
                 continue

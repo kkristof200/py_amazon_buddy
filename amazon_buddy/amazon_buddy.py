@@ -38,6 +38,7 @@ class AmazonBuddy(Api):
         proxy: Optional[Union[str, List[str]]] = None,
         max_request_try_count: int = 1,
         sleep_s_between_failed_requests: Optional[float] = 0.5,
+        use_cloudscrape: bool = True,
         debug: bool = False
     ):
         """init function
@@ -47,6 +48,7 @@ class AmazonBuddy(Api):
             proxy (Optional[Union[str, List[str]]], optional): Proxy/Proxies to use for requests. If list is provided, one will be chosen randomly. Defaults to None.
             max_request_try_count (int, optional): How many times does a request can be tried (if fails). Defaults to 1.
             sleep_s_between_failed_requests (Optional[float], optional): How much to wait between requests when retrying. Defaults to 0.5.
+            use_cloudscrape (bool, optional): Wether to use CloudScrape library instead of requests. Defaults to False.
             debug (bool, optional): Show debug logs. Defaults to False.
         """
         super().__init__(
@@ -61,7 +63,8 @@ class AmazonBuddy(Api):
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             },
             allow_redirects=False,
-            debug=debug
+            debug=debug,
+            use_cloudscrape=use_cloudscrape
         )
 
         self.did_set_us_address = False
@@ -185,7 +188,7 @@ class AmazonBuddy(Api):
                 print('Could not get address selection')
 
             return False
-        
+
         csrf_token = strings.between(address_selections_res.text, 'CSRF_TOKEN : "', '"')
 
         if not csrf_token:
@@ -354,7 +357,7 @@ class AmazonBuddy(Api):
             current_try += 1
 
         return None
-    
+
     def __get_related_searches(
         self,
         url: str,
