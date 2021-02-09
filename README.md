@@ -26,7 +26,7 @@ products = ab.search_products(
     sort_type=SortType.PRICE_HIGH_TO_LOW,
     min_price=0,
     category=Category.BEAUTY_AND_PERSONAL_CARE,
-    max_results=1000
+    max_results=20
 )
 print(len(products))
 

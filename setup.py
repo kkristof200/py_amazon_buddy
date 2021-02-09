@@ -9,7 +9,7 @@ else:
 
 setuptools.setup(
     name="amazon_buddy",
-    version="2.0.6",
+    version="2.0.7",
     author="Kristof",
     description="python wrapper for the amazon_buddy npm package",
     long_description=long_description,
