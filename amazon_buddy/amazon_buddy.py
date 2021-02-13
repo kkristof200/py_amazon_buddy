@@ -6,21 +6,16 @@ import urllib.parse
 import os, time, random
 
 # Pip
+from noraise import noraise
 from ksimpleapi import Api
 from kcu import strings
 
 # Local
-from .enums.category import Category
-from .enums.sort_type import SortType
+from .models import Category, SortType, ReviewRatingFilter, ReviewSortType, SearchResultProduct, Product, Review, ReviewImage
 
-from .models.search_result_product import SearchResultProduct
-from .models.product import Product
-from .models.review import Review
-from .models.review_image import ReviewImage
-
-from .filter import ProductFilter, ReviewFilter
-from .parser import Parser
-from .rh import RH
+from ._filter import ProductFilter, ReviewFilter
+from ._parser import Parser
+from ._rh import RH
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
 
@@ -69,26 +64,22 @@ class AmazonBuddy(Api):
 
         self.did_set_us_address = False
 
+
     # -------------------------------------------------------- Public methods -------------------------------------------------------- #
 
+    @noraise()
     def get_product_details(
         self,
         asin: str
     ) -> Optional[Product]:
-        try:
-            return Parser.parse_product(
-                self._get(
-                    'https://www.amazon.com/dp/{}'.format(asin),
-                    extra_headers={
-                        'Referer': 'https://www.amazon.com',
-                    }
-                )
+        return Parser.parse_product(
+            self._get(
+                'https://www.amazon.com/dp/{}'.format(asin),
+                extra_headers={
+                    'Referer': 'https://www.amazon.com',
+                }
             )
-        except Exception as e:
-            if self.debug:
-                print(e)
-
-            return None
+        )
 
     def get_product_reviews_with_images(
         self,
@@ -280,9 +271,15 @@ class AmazonBuddy(Api):
 
         # url
         asin: str,
+        media_reviews_only: bool = False,
+        verified_purchases_only: bool = False,
+        review_rating_filter: Optional[ReviewRatingFilter] = None,
+        review_sort_type: ReviewSortType = ReviewSortType.HELPFUL,
 
         # filter
         min_rating: float = 3.0,
+        ignored_ids: Optional[List[str]] = None,
+        ignore_foreign: bool = False,
 
         # request
         proxy: Optional[Union[str, List[str]]] = None,
@@ -292,9 +289,15 @@ class AmazonBuddy(Api):
         max_results: int = 100,
         debug: bool = False
     ) -> Optional[List[Review]]:
-        base_url = 'https://www.amazon.com/product-reviews/{}?ie=UTF8&reviewerType=all_reviews&sortBy=helpful'.format(asin)
+        base_url = 'https://www.amazon.com/product-reviews/{}/ref=cm_cr_arp_d_viewopt_srt?ie=UTF8&reviewerType={}&filterByStar={}&sortBy={}&formatType=current_format&mediaType={}'.format(
+            asin,
+            'avp_only_reviews' if verified_purchases_only else 'all_reviews',
+            (review_rating_filter or ReviewRatingFilter.STAR_ALL).value,
+            (review_sort_type or ReviewSortType.HELPFUL).value,
+            'media_reviews_only' if media_reviews_only else 'all_contents'
+        )
 
-        return self.__solve(base_url, 'pageNumber', ReviewFilter(min_rating), Parser.parse_reviews, max_results)
+        return self.__solve(base_url, 'pageNumber', ReviewFilter(min_rating, ignored_ids, ignore_foreign), Parser.parse_reviews, max_results)
 
 
     # ------------------------------------------------------- Private methods -------------------------------------------------------- #

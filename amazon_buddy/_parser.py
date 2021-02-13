@@ -2,11 +2,14 @@
 
 # System
 import html, json
-from typing import Optional, List, Dict
-from requests import Response
+from typing import Optional, List, Dict, Union
+from urllib.parse import unquote
 
 # Pip
+from requests import Response
+from noraise import noraise
 from bs4 import BeautifulSoup as bs
+from bs4 import element as BS4Element
 from kcu import request, kjson, strings
 from unidecode import unidecode
 
@@ -42,14 +45,14 @@ class Parser:
             return None
 
         images = parsed_json
-        title = parsed_json['title'].strip()
+        title = cls.__normalized_text(parsed_json['title'])
         asin = parsed_json['mediaAsin']
         videos = parsed_json['videos']
 
         try:
             for feature in soup.find('div', {'class':'a-section a-spacing-medium a-spacing-top-small'}).find_all('span', {'class':'a-list-item'}):
                 try:
-                    features.append(feature.get_text().strip())
+                    features.append(cls.__normalized_text(feature.get_text()))
                 except:
                     pass
         except Exception as e:
@@ -67,8 +70,9 @@ class Parser:
                 print(e)
 
         try:
-            price_text = soup.find('span', {'id':'priceblock_ourprice'}).text.replace('$', '').strip()
-            price = float(price_text)
+            price_text = soup.find('span', {'id':'priceblock_ourprice'}).text.strip()
+            price_float_text = ''.join([c for c in price_text if c in '0123456789.'])
+            price = float(price_float_text)
         except:
             price = None
 
@@ -81,8 +85,8 @@ class Parser:
                     key = tr.find('th').get_text().strip()
 
                     if key is not None and key not in ['Customer Reviews', 'Best Sellers Rank']:
-                        value = tr.find('td').get_text().strip()
-                        details[key] = value
+                        value = tr.find('td').get_text()
+                        details[cls.__normalized_text(key)] = cls.__normalized_text(value)
         except:
             pass
 
@@ -250,38 +254,62 @@ class Parser:
         return products
 
     @classmethod
-    def parse_reviews(cls, response: Optional[Response], debug: bool = False) -> List[Review]:
-        if not response or response.status_code not in [200, 201]:
-            return None
+    def parse_reviews(
+        cls,
+        response: Optional[Response],
+        debug: bool = False
+    ) -> List[Review]:
+        return [cls.parse_review(element=e, debug=debug) for e in bs(response.text, 'lxml').find_all('div', {'data-hook':'review'})] if response else []
 
-        reviews = []
+    @classmethod
+    @noraise()
+    def parse_review(
+        cls,
+        element: Union[BS4Element.Tag, BS4Element.NavigableString],
+        debug: bool = False
+    ) -> Optional:#[Review]:
+        id = element['id']
+        reviewer_name = element.find('span', class_='a-profile-name').text.strip()
+        rating = [int(c) for c in ''.join(element.find('i', class_='a-icon-star')['class']) if c.isnumeric()][0]
 
-        try:
-            soup = bs(response.text, 'lxml')
+        helpful_score = 0
+        helpful_score_element = element.find('span', class_='cr-vote-text')
 
-            for div in soup.find_all('div', {'data-hook':'review'}):
-                try:
-                    id = div['id']
-                    name = unidecode(html.unescape(div.find('span', class_='a-profile-name').text.strip()))
+        if helpful_score_element:
+            text = helpful_score_element.text.strip().replace(',', '')
 
-                    rating = int(div.find('i', class_='a-icon-star').find('span').text.split('.')[0].strip())
-                    title = unidecode(html.unescape(div.find(None, {'data-hook':'review-title'}).find('span').text.strip()))
-                    text = unidecode(html.unescape(div.find('span', {'data-hook':'review-body'}).find('span').text.strip()))
+            helpful_score_numbers = [int(c) for c in text.split() if c.isnumeric()]
+            helpful_score = helpful_score_numbers[0] if helpful_score_numbers else 1
 
-                    try:
-                        helpful_score = int(div.find('span', {'data-hook':'review-vote-statement'}.text.split(' ')[0]))
-                    except:
-                        helpful_score = 0
+        title = cls.__normalized_text(element.find(attrs={'data-hook':'review-title'}).text)
+        text = cls.__normalized_text(element.find(attrs={'data-hook':'review-body'}).find('span').text)
 
-                    reviews.append(Review(id, name, rating, helpful_score, title, text))
-                except Exception as e:
-                    if debug:
-                        print(e)
-        except Exception as e:
-            if debug:
-                print(e)
+        language = 'en'
+        translate_element = element.find('div', class_='cr-translate-this-review-section')
+        foreign = translate_element is not None
 
-        return reviews
+        if foreign:
+            t = unquote(translate_element.find('span')['data-reviews:ajax-post'])
+            language = t.split('language\\":\\"')[-1].split('\\')[0]
+
+        review_section_element = element.find('div', class_='review-image-tile-section')
+
+        if review_section_element:
+            image_urls = [e['src'].replace('._SY88', '') for e in review_section_element.find_all('img')]
+        else:
+            image_urls = []
+
+        return Review(
+            id=id,
+            reviewer_name=reviewer_name,
+            rating=rating,
+            upvotes=helpful_score,
+            title=title,
+            text=text,
+            language=language,
+            foreign=foreign,
+            image_urls=image_urls,
+        )
 
     @classmethod
     def parse_suggested_rh(cls, response: Optional[Response], min_stars: int, debug: bool = False) -> Optional[str]:
@@ -338,7 +366,18 @@ class Parser:
 
         return searches
 
+
     # -------------------------------------------------------- Private methods -------------------------------------------------------- #
+
+    @staticmethod
+    def __normalized_text(s: str) -> str:
+        s = s.strip()
+        s = s.replace('<br />', '')
+        s = unquote(s)
+        s = '\n'.join([l.strip() for l in s.split('\n') if len(l.strip()) > 0])
+
+        return unidecode(html.unescape(s))
+
     @staticmethod
     def __json_loads(s: str) -> Optional[Dict]:
         try:

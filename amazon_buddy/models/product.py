@@ -6,6 +6,11 @@ from typing import Optional, List, Dict, Union
 # Pip
 from jsoncodable import JSONCodable
 
+# Local
+from .product_image_set import ProductImageSet
+from .product_video import ProductVideo
+from .product_detail import ProductDetail
+
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
 
 
@@ -32,13 +37,14 @@ class Product(JSONCodable):
         self.price = price
         self.categories = categories or []
         self.features = features or []
-        self.details = details
         self.videos = []
         self.video_urls = []
         self.images = {}
         self.associated_asins = []
         self.asins = [asin]
         self.image_urls = []
+
+        self.details = [ProductDetail(k, v) for k, v in details.items()]
 
         if images:
             for assoc_asin, image_dict in images.items():
@@ -61,50 +67,6 @@ class Product(JSONCodable):
                 if 'title' in video and 'height' in video and 'width' in video and 'url' in video:
                     self.videos.append(ProductVideo(video['url'], video['title'], video['height'], video['width']))
                     self.video_urls.append(video['url'])
-
-
-# ---------------------------------------------------------------------------------------------------------------------------------------- #
-
-
-
-# -------------------------------------------------------- class: ProductImageSet -------------------------------------------------------- #
-
-class ProductImageSet(JSONCodable):
-
-    # ------------------------------------------------------------- Init ------------------------------------------------------------- #
-
-    def __init__(
-        self,
-        asin: str,
-        name: str,
-        urls: List[str]
-    ):
-        self.asin = asin
-        self.name = name
-        self.urls = urls
-
-
-# ---------------------------------------------------------------------------------------------------------------------------------------- #
-
-
-
-# ---------------------------------------------------------- class: ProductVideo --------------------------------------------------------- #
-
-class ProductVideo(JSONCodable):
-
-    # ------------------------------------------------------------- Init ------------------------------------------------------------- #
-
-    def __init__(
-        self,
-        url: str,
-        title: str,
-        height: int,
-        width: int
-    ):
-        self.url = url
-        self.title = title
-        self.height = height
-        self.width = width
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #

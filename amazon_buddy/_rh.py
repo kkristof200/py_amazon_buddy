@@ -5,7 +5,7 @@ import urllib.parse
 from typing import Optional
 
 # Local
-from .enums.product_condition import ProductCondition
+from .models import ProductCondition
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
 

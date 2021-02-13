@@ -2,15 +2,9 @@
 
 # System
 from typing import Optional, List
-from requests import Response
-
-# Pip
-from bs4 import BeautifulSoup as bs
-from kcu import request, kjson
 
 # Local
-from .models.search_result_product import SearchResultProduct
-from .models.review import Review
+from ..models import SearchResultProduct
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
 
@@ -37,6 +31,9 @@ class ProductFilter:
         self.min_reviews = min_reviews or 0
         self.ignored_asins = [ia.lower() for ia in ignored_asins] if ignored_asins else []
         self.ignored_title_strs = [ts.lower() for ts in ignored_title_strs] if ignored_title_strs else []
+
+
+    # -------------------------------------------------------- Public methods -------------------------------------------------------- #
 
     def filter(self, products: List[SearchResultProduct]) -> List[SearchResultProduct]:
         filtered = []
@@ -73,6 +70,9 @@ class ProductFilter:
 
         return filtered
 
+
+    # ------------------------------------------------------- Private methods -------------------------------------------------------- #
+
     @staticmethod
     def __contains_in(s: str, strs: List[str]) -> bool:
         s = s.lower()
@@ -82,43 +82,6 @@ class ProductFilter:
                 return True
 
         return False
-
-
-# ---------------------------------------------------------------------------------------------------------------------------------------- #
-
-
-
-# --------------------------------------------------------- class: ReviewFilter ---------------------------------------------------------- #
-
-class ReviewFilter:
-
-    # ------------------------------------------------------------- Init ------------------------------------------------------------- #
-
-    def __init__(
-        self,
-        min_rating: Optional[int] = None
-    ):
-        self.min_rating = min_rating or 0
-        self.ignored_ids = []
-
-    def filter(self, reviews: List[Review]) -> List[Review]:
-        filtered = []
-
-        for r in reviews:
-            r_id = r.id.lower()
-
-            if r_id in self.ignored_ids:
-                # print('includes')
-                continue
-
-            if r.rating < self.min_rating:
-                # print('low rating')
-                continue
-
-            self.ignored_ids.append(r_id)
-            filtered.append(r)
-
-        return filtered
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
