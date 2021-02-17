@@ -33,6 +33,8 @@ class AmazonBuddy(Api):
         proxy: Optional[Union[str, List[str]]] = None,
         max_request_try_count: int = 1,
         sleep_s_between_failed_requests: Optional[float] = 0.5,
+        keep_cookies: bool = True,
+        allow_redirects: bool = False,
         use_cloudscrape: bool = True,
         debug: bool = False
     ):
@@ -43,13 +45,15 @@ class AmazonBuddy(Api):
             proxy (Optional[Union[str, List[str]]], optional): Proxy/Proxies to use for requests. If list is provided, one will be chosen randomly. Defaults to None.
             max_request_try_count (int, optional): How many times does a request can be tried (if fails). Defaults to 1.
             sleep_s_between_failed_requests (Optional[float], optional): How much to wait between requests when retrying. Defaults to 0.5.
+            keep_cookies (bool, optional): Wether to use cookies or not. Defaults to True.
+            allow_redirects (bool, optional): Wether to allow request redirects or not. Defaults to False.
             use_cloudscrape (bool, optional): Wether to use CloudScrape library instead of requests. Defaults to False.
             debug (bool, optional): Show debug logs. Defaults to False.
         """
         super().__init__(
             user_agent=user_agent,
             proxy=proxy,
-            keep_cookies=True,
+            keep_cookies=keep_cookies,
             max_request_try_count=max_request_try_count,
             sleep_s_between_failed_requests=sleep_s_between_failed_requests,
             extra_headers={
@@ -57,7 +61,7 @@ class AmazonBuddy(Api):
                 'Origin': 'https://www.amazon.com',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             },
-            allow_redirects=False,
+            allow_redirects=allow_redirects,
             debug=debug,
             use_cloudscrape=use_cloudscrape
         )
@@ -261,7 +265,7 @@ class AmazonBuddy(Api):
         if rh:
             base_url += '&rh={}'.format(rh)
 
-        if not self.did_set_us_address and use_us_address_if_needed:
+        if self._request.keep_cookies and not self.did_set_us_address and use_us_address_if_needed:
             self.set_us_address()
 
         return self.__solve(base_url, 'page', ProductFilter(min_price, max_price, min_rating, min_reviews, ignored_asins, ignored_title_strs), Parser.parse_products, max_results)
