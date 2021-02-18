@@ -1,7 +1,7 @@
 # --------------------------------------------------------------- Imports ---------------------------------------------------------------- #
 
 # System
-import html, json
+import html, json, traceback
 from typing import Optional, List, Dict, Union, Tuple, Callable
 from urllib.parse import unquote
 
@@ -372,8 +372,8 @@ class Parser:
         if response is None:
             return None
 
-        if response.status_code not in allowed_response_status_codes:
-            if response.status_code == 503 and self.did_get_detected_callback:
+        if response.status_code not in allowed_response_status_codes or not response.text:
+            if self.did_get_detected_callback:
                 self.did_get_detected_callback()
 
             return None
@@ -396,8 +396,8 @@ class Parser:
         except:
             try:
                 return json.loads(s.replace('\\\'', '\''))
-            except Exception as e:
-                print(e)
+            except:
+                traceback.print_exc()
 
         return None
 
