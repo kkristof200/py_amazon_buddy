@@ -35,7 +35,8 @@ class AmazonBuddy(Api):
         sleep_s_between_failed_requests: Optional[float] = 0.5,
         keep_cookies: bool = True,
         allow_redirects: bool = False,
-        use_cloudscrape: bool = True,
+        use_cloudscrape: bool = False,
+        did_get_detected_callback: Optional[Callable] = None,
         debug: bool = False
     ):
         """init function
@@ -48,6 +49,7 @@ class AmazonBuddy(Api):
             keep_cookies (bool, optional): Wether to use cookies or not. Defaults to True.
             allow_redirects (bool, optional): Wether to allow request redirects or not. Defaults to False.
             use_cloudscrape (bool, optional): Wether to use CloudScrape library instead of requests. Defaults to False.
+            did_get_detected_callback (Callable, optional): Called, when amazon returns a bot response.
             debug (bool, optional): Show debug logs. Defaults to False.
         """
         super().__init__(
@@ -67,6 +69,7 @@ class AmazonBuddy(Api):
         )
 
         self.did_set_us_address = False
+        self._parser = Parser(did_get_detected_callback)
 
 
     # -------------------------------------------------------- Public methods -------------------------------------------------------- #
@@ -76,7 +79,7 @@ class AmazonBuddy(Api):
         self,
         asin: str
     ) -> Optional[Product]:
-        return Parser.parse_product(
+        return self._parser.parse_product(
             self._get(
                 'https://www.amazon.com/dp/{}'.format(asin),
                 extra_headers={
@@ -90,12 +93,12 @@ class AmazonBuddy(Api):
         asin: str
     ) -> Optional[List[ReviewImage]]:
         try:
-            # return Parser.parse_reviews_with_images(
+            # return self._parser.parse_reviews_with_images(
             #     self._get('https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin={}'.format(asin))
             # )
             data = 'asin={}noCache={}'.format(asin, int(time.time() * 1000))
 
-            return Parser.parse_reviews_with_images(
+            return self._parser.parse_reviews_with_images(
                 self._post(
                     'https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin',
                     body=data,
@@ -268,7 +271,7 @@ class AmazonBuddy(Api):
         if self._request.keep_cookies and not self.did_set_us_address and use_us_address_if_needed:
             self.set_us_address()
 
-        return self.__solve(base_url, 'page', ProductFilter(min_price, max_price, min_rating, min_reviews, ignored_asins, ignored_title_strs), Parser.parse_products, max_results)
+        return self.__solve(base_url, 'page', ProductFilter(min_price, max_price, min_rating, min_reviews, ignored_asins, ignored_title_strs), self._parser.parse_products, max_results)
 
     def get_reviews(
         self,
@@ -301,7 +304,7 @@ class AmazonBuddy(Api):
             'media_reviews_only' if media_reviews_only else 'all_contents'
         )
 
-        return self.__solve(base_url, 'pageNumber', ReviewFilter(min_rating, ignored_ids, ignore_foreign), Parser.parse_reviews, max_results)
+        return self.__solve(base_url, 'pageNumber', ReviewFilter(min_rating, ignored_ids, ignore_foreign), self._parser.parse_reviews, max_results)
 
 
     # ------------------------------------------------------- Private methods -------------------------------------------------------- #
@@ -355,7 +358,7 @@ class AmazonBuddy(Api):
         current_try = 1
 
         while current_try <= max_try:
-            rh = Parser.parse_suggested_rh(self._get(url), int(min_rating))
+            rh = self._parser.parse_suggested_rh(self._get(url), int(min_rating))
 
             if rh:
                 return rh
@@ -373,7 +376,7 @@ class AmazonBuddy(Api):
         current_try = 1
 
         while current_try <= max_try:
-            rs = Parser.parse_related_searches(
+            rs = self._parser.parse_related_searches(
                 self._get(
                     url,
                     extra_headers={

@@ -2,7 +2,7 @@
 
 # System
 import html, json
-from typing import Optional, List, Dict, Union
+from typing import Optional, List, Dict, Union, Tuple, Callable
 from urllib.parse import unquote
 
 # Pip
@@ -27,32 +27,41 @@ from .models.review_image import ReviewImage
 
 class Parser:
 
+    # ------------------------------------------------------------- Init ------------------------------------------------------------- #
+
+    def __init__(
+        self,
+        did_get_detected_callback: Optional[Callable] = None
+    ):
+        self.did_get_detected_callback = did_get_detected_callback
+
+
     # -------------------------------------------------------- Public methods -------------------------------------------------------- #
 
-    @classmethod
-    def parse_product(cls, response: Optional[Response], debug: bool = False) -> Optional[Product]:
-        if not response or response.status_code not in [200, 201]:
+    def parse_product(self, response: Optional[Response], debug: bool = False) -> Optional[Product]:
+        soup = self.__parse_response(response)
+
+        if not soup:
             return None
 
         categories = []
         features = []
         videos = []
 
-        soup = bs(response.content, 'lxml')
-        parsed_json = cls.__json_loads(strings.between(response.text, 'var obj = jQuery.parseJSON(\'', '\')'))
+        parsed_json = self.__json_loads(strings.between(response.text, 'var obj = jQuery.parseJSON(\'', '\')'))
 
         if parsed_json is None:
             return None
 
         images = parsed_json
-        title = cls.__normalized_text(parsed_json['title'])
+        title = self.__normalized_text(parsed_json['title'])
         asin = parsed_json['mediaAsin']
         videos = parsed_json['videos']
 
         try:
             for feature in soup.find('div', {'class':'a-section a-spacing-medium a-spacing-top-small'}).find_all('span', {'class':'a-list-item'}):
                 try:
-                    features.append(cls.__normalized_text(feature.get_text()))
+                    features.append(self.__normalized_text(feature.get_text()))
                 except:
                     pass
         except Exception as e:
@@ -86,7 +95,7 @@ class Parser:
 
                     if key is not None and key not in ['Customer Reviews', 'Best Sellers Rank']:
                         value = tr.find('td').get_text()
-                        details[cls.__normalized_text(key)] = cls.__normalized_text(value)
+                        details[self.__normalized_text(key)] = self.__normalized_text(value)
         except:
             pass
 
@@ -131,7 +140,7 @@ class Parser:
 
         if image_details is None or image_details == {}:
             try:
-                images_json = cls.__json_loads(strings.between(response.text, '\'colorImages\': { \'initial\': ', '}]},') + '}]')
+                images_json = self.__json_loads(strings.between(response.text, '\'colorImages\': { \'initial\': ', '}]},') + '}]')
 
                 if images_json is not None:
                     image_details[asin] = {
@@ -151,7 +160,7 @@ class Parser:
         associated_asins = []
 
         try:
-            associated_asins_json = cls.__json_loads(strings.between(response.text, 'dimensionToAsinMap :', '},').strip() + '}')
+            associated_asins_json = self.__json_loads(strings.between(response.text, 'dimensionToAsinMap :', '},').strip() + '}')
 
             if associated_asins_json is not None:
                 for val in associated_asins_json.values():
@@ -161,14 +170,13 @@ class Parser:
 
         return Product(title, asin, price, categories, features, details, image_details, videos)
 
-    @classmethod
-    def parse_reviews_with_images(cls, response: Optional[Response], debug: bool = False) -> Optional[List[ReviewImage]]:
+    def parse_reviews_with_images(self, response: Optional[Response], debug: bool = False) -> Optional[List[ReviewImage]]:
         # 'https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin='
         if not response or response.status_code not in [200, 201]:
             return None
 
         try:
-            reviews_json = cls.__json_loads(response.text)
+            reviews_json = self.__json_loads(response.text)
         except Exception as e:
             if debug:
                 print(e)
@@ -211,60 +219,58 @@ class Parser:
         return [ReviewImage(r['author'], r['text'], r['rating'], r['image_urls'], r['upvotes'])
                 for r in sorted(reviews.values(), key=lambda k: k['upvotes'], reverse=True)]
 
-    @classmethod
-    def parse_products(cls, response: Optional[Response], debug: bool = False) -> List[SearchResultProduct]:
-        if not response or response.status_code not in [200, 201]:
+    def parse_products(self, response: Optional[Response], debug: bool = False) -> List[SearchResultProduct]:
+        soup = self.__parse_response(response)
+
+        if not soup:
             return []
 
         products = []
 
-        try:
-            soup = bs(response.text, 'lxml')
+        for div in [div for div in soup.find_all('div') if div.has_attr('data-asin') and len(div['data-asin']) > 0]:
+            try:
+                asin = div['data-asin']
+                title = unidecode(html.unescape((div.find('span', class_='a-size-base-plus a-color-base a-text-normal') or div.find('span', class_='a-size-medium a-color-base a-text-normal')).text))
 
-            for div in [div for div in soup.find_all('div') if div.has_attr('data-asin') and len(div['data-asin']) > 0]:
                 try:
-                    asin = div['data-asin']
-                    title = unidecode(html.unescape((div.find('span', class_='a-size-base-plus a-color-base a-text-normal') or div.find('span', class_='a-size-medium a-color-base a-text-normal')).text))
+                    price = float(div.find('span', class_='a-price').find('span', class_='a-price-whole').text.replace(',', '')) + float(div.find('span', class_='a-price').find('span', class_='a-price-fraction').text.replace(',', '')) / 100
+                except:# Exception as e:
+                    price = None
 
-                    try:
-                        price = float(div.find('span', class_='a-price').find('span', class_='a-price-whole').text.replace(',', '')) + float(div.find('span', class_='a-price').find('span', class_='a-price-fraction').text.replace(',', '')) / 100
-                    except Exception as e:
-                        price = None
-
-                        # if debug:
-                        #     print(e)
-
-                    try:
-                        spans = [span['aria-label'] for span in div.find_all('span') if span.has_attr('aria-label')]
-                        rating = float(spans[0].split(' ')[0])
-                        review_count = int(spans[1].replace(',', ''))
-                    except:
-                        rating = 0
-                        review_count = 0
-
-                    products.append(SearchResultProduct(asin, title, price, rating, review_count))
-                except Exception as e:
-                    pass
                     # if debug:
                     #     print(e)
-        except Exception as e:
-            if debug:
-                print(e)
+
+                try:
+                    spans = [span['aria-label'] for span in div.find_all('span') if span.has_attr('aria-label')]
+                    rating = float(spans[0].split(' ')[0])
+                    review_count = int(spans[1].replace(',', ''))
+                except:# Exception as e:
+                    rating = 0
+                    review_count = 0
+
+                products.append(SearchResultProduct(asin, title, price, rating, review_count))
+            except:# Exception as e:
+                pass
+                # if debug:
+                #     print(e)
 
         return products
 
-    @classmethod
     def parse_reviews(
-        cls,
+        self,
         response: Optional[Response],
         debug: bool = False
     ) -> List[Review]:
-        return [cls.parse_review(element=e, debug=debug) for e in bs(response.text, 'lxml').find_all('div', {'data-hook':'review'})] if response else []
+        soup = self.__parse_response(response)
 
-    @classmethod
+        if not soup:
+            return []
+
+        return [self.parse_review(element=e, debug=debug) for e in soup.find_all('div', {'data-hook':'review'})]
+
     @noraise()
     def parse_review(
-        cls,
+        self,
         element: Union[BS4Element.Tag, BS4Element.NavigableString],
         debug: bool = False
     ) -> Optional:#[Review]:
@@ -281,8 +287,8 @@ class Parser:
             helpful_score_numbers = [int(c) for c in text.split() if c.isnumeric()]
             helpful_score = helpful_score_numbers[0] if helpful_score_numbers else 1
 
-        title = cls.__normalized_text(element.find(attrs={'data-hook':'review-title'}).text)
-        text = cls.__normalized_text(element.find(attrs={'data-hook':'review-body'}).find('span').text)
+        title = self.__normalized_text(element.find(attrs={'data-hook':'review-title'}).text)
+        text = self.__normalized_text(element.find(attrs={'data-hook':'review-body'}).find('span').text)
 
         language = 'en'
         translate_element = element.find('div', class_='cr-translate-this-review-section')
@@ -311,63 +317,68 @@ class Parser:
             image_urls=image_urls,
         )
 
-    @classmethod
-    def parse_suggested_rh(cls, response: Optional[Response], min_stars: int, debug: bool = False) -> Optional[str]:
-        if not response or response.status_code not in [200, 201]:
+    def parse_suggested_rh(self, response: Optional[Response], min_stars: int, debug: bool = False) -> Optional[str]:
+        soup = self.__parse_response(response)
+
+        if not soup:
             return None
 
-        try:
-            soup = bs(response.content, 'lxml')
+        for a in soup.find_all('a', class_='a-link-normal s-navigation-item'):
+            try:
+                if not a.find('i', class_='a-icon a-icon-star-medium a-star-medium-{}'.format(min_stars)):
+                    continue
 
-            for a in soup.find_all('a', class_='a-link-normal s-navigation-item'):
-                try:
-                    if not a.find('i', class_='a-icon a-icon-star-medium a-star-medium-{}'.format(min_stars)):
-                        continue
+                href = a['href']
 
-                    href = a['href']
-
-                    if 'rh=n%3A' in href:
-                        return 'n' + href.split('rh=n')[1].split('&')[0]
-                except Exception as e:
-                    if debug:
-                        print(e)
-        except Exception as e:
-            if debug:
-                print(e)
+                if 'rh=n%3A' in href:
+                    return 'n' + href.split('rh=n')[1].split('&')[0]
+            except Exception as e:
+                if debug:
+                    print(e)
 
         return None
 
-    @classmethod
-    def parse_related_searches(cls, response: Optional[Response], debug: bool = False) -> Optional[List[str]]:
-        if not response or response.status_code not in [200, 201]:
+    def parse_related_searches(self, response: Optional[Response], debug: bool = False) -> Optional[List[str]]:
+        soup = self.__parse_response(response)
+
+        if not soup:
             return None
 
         searches = []
 
-        try:
-            soup = bs(response.content, 'lxml')
+        for a in soup.find_all('a', class_='a-link-normal s-no-outline'):
+            try:
+                img = a.find('img')
 
-            for a in soup.find_all('a', class_='a-link-normal s-no-outline'):
-                try:
-                    img = a.find('img')
+                if not img or not a['href'].startswith('/s'):
+                    continue
 
-                    if not img or not a['href'].startswith('/s'):
-                        continue
-
-                    searches.append(img['alt'].replace(', End of \'Related searches\' list', ''))
-                except Exception as e:
-                    if debug:
-                        print(e)
-        except Exception as e:
-            if debug:
-                print(e)
-
-            return None
+                searches.append(img['alt'].replace(', End of \'Related searches\' list', ''))
+            except Exception as e:
+                if debug:
+                    print(e)
 
         return searches
 
 
     # -------------------------------------------------------- Private methods -------------------------------------------------------- #
+
+    @noraise()
+    def __parse_response(
+        self,
+        response: Optional[Response],
+        allowed_response_status_codes: List[int] = [200, 201]
+    ) -> Optional[bs]:
+        if not response:
+            return None
+
+        if response.status_code not in allowed_response_status_codes:
+            if response.status_code == 503 and self.did_get_detected_callback:
+                self.did_get_detected_callback()
+
+            return None
+
+        return bs(response.content, 'lxml')
 
     @staticmethod
     def __normalized_text(s: str) -> str:
