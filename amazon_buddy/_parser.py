@@ -369,7 +369,7 @@ class Parser:
         response: Optional[Response],
         allowed_response_status_codes: List[int] = [200, 201]
     ) -> Optional[bs]:
-        if not response:
+        if response is None:
             return None
 
         if response.status_code not in allowed_response_status_codes:
