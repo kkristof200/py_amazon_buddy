@@ -51,6 +51,13 @@ class Parser:
         parsed_json = self.__json_loads(strings.between(response.text, 'var obj = jQuery.parseJSON(\'', '\')'))
 
         if parsed_json is None:
+            try:
+                print('response            ', response)
+                print('response.status_code', response.status_code)
+                print('response.encoding   ', response.encoding)
+            except Exception as e:
+                print('ERROR while printing response:', e)
+
             if self.did_get_detected_callback:
                 self.did_get_detected_callback()
 
