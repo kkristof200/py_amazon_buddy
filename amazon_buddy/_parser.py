@@ -276,7 +276,7 @@ class Parser:
         if not soup:
             return []
 
-        return [self.parse_review(element=e, debug=debug) for e in soup.find_all('div', {'data-hook':'review'})]
+        return [r for r in [self.parse_review(element=e, debug=debug) for e in soup.find_all('div', {'data-hook':'review'})] if r]
 
     @noraise()
     def parse_review(
@@ -298,7 +298,14 @@ class Parser:
             helpful_score = helpful_score_numbers[0] if helpful_score_numbers else 1
 
         title = self.__normalized_text(element.find(attrs={'data-hook':'review-title'}).text)
-        text = self.__normalized_text(element.find(attrs={'data-hook':'review-body'}).find('span').text)
+
+        text_span = element.find(attrs={'data-hook':'review-body'})
+        _text_span = text_span.find('span')
+
+        if _text_span is not None:
+            text_span = _text_span
+
+        text = self.__normalized_text(text_span.text)
 
         language = 'en'
         translate_element = element.find('div', class_='cr-translate-this-review-section')
