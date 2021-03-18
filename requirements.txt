@@ -1,7 +1,7 @@
 beautifulsoup4==4.9.3
 jsoncodable==0.0.12
-kcu==0.0.63
+kcu==0.0.66
 ksimpleapi==0.0.39
-noraise==0.0.8
+noraise==0.0.10
 requests==2.25.1
 Unidecode==1.2.0

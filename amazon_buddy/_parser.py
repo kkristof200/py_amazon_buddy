@@ -1,7 +1,7 @@
 # --------------------------------------------------------------- Imports ---------------------------------------------------------------- #
 
 # System
-import html, json, traceback
+import html, json, traceback, copy
 from typing import Optional, List, Dict, Union, Tuple, Callable
 from urllib.parse import unquote
 
@@ -14,10 +14,7 @@ from kcu import request, kjson, strings
 from unidecode import unidecode
 
 # Local
-from .models.search_result_product import SearchResultProduct
-from .models.product import Product
-from .models.review import Review
-from .models.review_image import ReviewImage
+from .models import SearchResultProduct, Product, BaseProduct, Review, ReviewImage
 
 # ---------------------------------------------------------------------------------------------------------------------------------------- #
 
@@ -63,7 +60,6 @@ class Parser:
 
             return None
 
-        images = parsed_json
         title = self.__normalized_text(parsed_json['title'])
         asin = parsed_json['mediaAsin']
         videos = parsed_json['videos']
@@ -71,6 +67,9 @@ class Parser:
         try:
             for feature in soup.find('div', {'class':'a-section a-spacing-medium a-spacing-top-small'}).find_all('span', {'class':'a-list-item'}):
                 try:
+                    if feature.find('span', {'id':'replacementPartsFitmentBulletInner'}):
+                        continue
+
                     features.append(self.__normalized_text(feature.get_text()))
                 except:
                     pass
@@ -95,37 +94,55 @@ class Parser:
         except:
             price = None
 
-        try:
-            table_for_product_info = soup.find('table', {'id':'productDetails_detailBullets_sections1', 'class':'a-keyvalue prodDetTable'})
+        details = {}
 
-            details = {}
-            if table_for_product_info is not None:
-                for tr in table_for_product_info.find_all('tr'):
+        for table in soup.find_all('table', class_='a-keyvalue prodDetTable'):
+            for tr in table.find_all('tr'):
+                try:
                     key = tr.find('th').get_text().strip()
 
                     if key is not None and key not in ['Customer Reviews', 'Best Sellers Rank']:
                         value = tr.find('td').get_text()
                         details[self.__normalized_text(key)] = self.__normalized_text(value)
-        except:
-            pass
+                except:
+                    pass
 
         image_details = {}
 
-        if 'colorToAsin' in images and images['colorToAsin'] is not None:
-            colors = images['colorToAsin']
+# self.__json_loads(strings.between(response.text, '\'colorImages\': { \'initial\':', '}]},') + '}]')
 
+        colors = parsed_json.get('colorToAsin')
+
+        if colors:
             for color_name, color_dict in colors.items():
-                _asin = color_dict['asin']
-                image_details[_asin] = {
-                    'name' : color_name,
-                    'image_urls' : []
+                try:
+                    _asin = color_dict['asin']
+                    image_details[_asin] = {
+                        'name' : color_name,
+                        'image_urls' : []
+                    }
+
+                    images_by_color = parsed_json['colorImages'][color_name]
+
+                    for elem in images_by_color:
+                        img_url = elem.get('hiRes') or elem.get('large')
+
+                        if img_url:
+                            image_details[_asin]['image_urls'].append(img_url)
+                except:
+                    pass
+        else:
+            try:
+                image_details[asin] = {
+                    'name' : asin,
+                    'image_urls' : [
+                        e for e in [
+                            e.get('hiRes') or e.get('large') for e in self.__json_loads(strings.between(response.text, '\'colorImages\': { \'initial\':', '}]},') + '}]')
+                        ] if e
+                    ]
                 }
-
-                images_by_color = images['colorImages'][color_name]
-
-                for elem in images_by_color:
-                    if 'hiRes' in elem:
-                        image_details[_asin]['image_urls'].append(elem['hiRes'])
+            except:
+                pass
 
         added_video_urls = []
 
@@ -148,25 +165,6 @@ class Parser:
                 if debug:
                     print(e)
 
-        if image_details is None or image_details == {}:
-            try:
-                images_json = self.__json_loads(strings.between(response.text, '\'colorImages\': { \'initial\': ', '}]},') + '}]')
-
-                if images_json is not None:
-                    image_details[asin] = {
-                        'name' : asin,
-                        'image_urls' : []
-                    }
-
-                    for image_json in images_json:
-                        try:
-                            image_details[asin]['image_urls'].append(image_json['large'])
-                        except Exception as e:
-                            if debug:
-                                print(e)
-            except:
-                pass
-
         associated_asins = []
 
         try:
@@ -178,7 +176,76 @@ class Parser:
         except:
             pass
 
-        return Product(title, asin, price, categories, features, details, image_details, videos)
+        related_products = []
+        related_products_wrappers = [
+            e for e in
+            [soup.find('div', {'cel_widget_id': 'sims-consolidated-{}_csm_instrumentation_wrapper'.format(i)}) for i in range(4)]
+            if e]
+
+        for related_products_wrapper in related_products_wrappers:
+            if related_products_wrapper:
+                for li in related_products_wrapper.find_all('li', class_='a-carousel-card'):
+                    try:
+                        price_title_a = li.find('div', class_='a-row a-color-price').find('a')
+
+                        related_products.append(
+                            BaseProduct(
+                                title=self.__normalized_text(price_title_a['title']),
+                                asin=li.find('div')['data-asin'],
+                                price=float(price_title_a.find('span').text.lstrip('$')),
+                                main_image_url=li.find('img', class_='a-dynamic-image')['src'].replace('160,160', '')
+                            )
+                        )
+                    except Exception as e:
+                        pass
+
+        comparison_table = soup.find('table', {'id':'HLCXComparisonTable'})
+        similar_products = {}
+
+        if comparison_table:
+            similar_products = {}
+
+            prices_row = comparison_table.find('tr', {'id':'comparison_price_row'})
+            prices_spans = prices_row.find_all('span', class_='a-price')
+            other_rows = comparison_table.find_all('tr', class_='comparison_other_attribute_row')
+
+            for i, si_th in enumerate(comparison_table.find_all('th', {'role': 'columnheader'})):
+                try:
+                    si_asin = si_th['data-asin']
+                    img = si_th.find('img')
+
+                    similar_products[si_asin] = {
+                        'product': BaseProduct(
+                            title=self.__normalized_text(img['alt']),
+                            asin=si_asin,
+                            price=float(prices_spans[i].find('span').text.lstrip('$')),
+                            main_image_url=img['data-src']
+                        ),
+                        'other_attributes': {}
+                    }
+
+                    for other_row in other_rows:
+                        res = other_row.find_all('td')[i].find('span').text
+
+                        if res == '—':
+                            res = None
+
+                        similar_products[si_asin]['other_attributes'][other_row.find('th').find('span').text] = res
+                except:
+                    pass
+
+        if price == None and similar_products:
+            this_similar_product = similar_products.get(asin, {}).get('product')
+
+            if this_similar_product:
+                price = this_similar_product.price
+
+        try:
+            descripton = soup.find('div', {'id':'productDescription'}).find('p').text.strip()
+        except:
+            descripton = None
+
+        return Product(title, asin, price, categories, features, descripton, details, image_details, videos, related_products, similar_products)
 
     def parse_reviews_with_images(self, response: Optional[Response], debug: bool = False) -> Optional[List[ReviewImage]]:
         # 'https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin='
@@ -402,6 +469,7 @@ class Parser:
         s = s.strip()
         s = s.replace('<br />', '')
         s = unquote(s)
+        s = html.unescape(s)
         s = '\n'.join([l.strip() for l in s.split('\n') if len(l.strip()) > 0])
 
         return unidecode(html.unescape(s))

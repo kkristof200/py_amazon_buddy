@@ -1,3 +1,4 @@
+from .base_product import BaseProduct
 from .product import Product
 from .product_image_set import ProductImageSet
 from .product_video import ProductVideo
