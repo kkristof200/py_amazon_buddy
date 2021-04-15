@@ -9,7 +9,7 @@ else:
 
 setuptools.setup(
     name="amazon_buddy",
-    version="2.0.16",
+    version="2.0.17",
     author="Kristof",
     description="python wrapper for the amazon_buddy npm package",
     long_description=long_description,
@@ -18,9 +18,9 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'beautifulsoup4>=4.9.3',
-        'jsoncodable>=0.0.12',
+        'jsoncodable>=0.1.2',
         'kcu>=0.0.66',
-        'ksimpleapi>=0.0.39',
+        'ksimpleapi>=0.0.40',
         'noraise>=0.0.10',
         'requests>=2.25.1',
         'Unidecode>=1.2.0'
