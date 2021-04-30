@@ -1,4 +1,4 @@
-# --------------------------------------------------------------- Imports ---------------------------------------------------------------- #
+# ------------------------------------------------------------ Imports ----------------------------------------------------------- #
 
 # System
 import html, json, traceback, copy
@@ -16,15 +16,15 @@ from unidecode import unidecode
 # Local
 from .models import SearchResultProduct, Product, BaseProduct, Review, ReviewImage
 
-# ---------------------------------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------------------------- #
 
 
 
-# ------------------------------------------------------------ class: Parser ------------------------------------------------------------- #
+# --------------------------------------------------------- class: Parser -------------------------------------------------------- #
 
 class Parser:
 
-    # ------------------------------------------------------------- Init ------------------------------------------------------------- #
+    # --------------------------------------------------------- Init --------------------------------------------------------- #
 
     def __init__(
         self,
@@ -33,7 +33,7 @@ class Parser:
         self.did_get_detected_callback = did_get_detected_callback
 
 
-    # -------------------------------------------------------- Public methods -------------------------------------------------------- #
+    # ---------------------------------------------------- Public methods ---------------------------------------------------- #
 
     def parse_product(self, response: Optional[Response], debug: bool = False) -> Optional[Product]:
         soup = self.__parse_response(response)
@@ -184,20 +184,14 @@ class Parser:
 
         for related_products_wrapper in related_products_wrappers:
             if related_products_wrapper:
-                for li in related_products_wrapper.find_all('li', class_='a-carousel-card'):
-                    try:
-                        price_title_a = li.find('div', class_='a-row a-color-price').find('a')
+                related_products_asins = []
 
-                        related_products.append(
-                            BaseProduct(
-                                title=self.__normalized_text(price_title_a['title']),
-                                asin=li.find('div')['data-asin'],
-                                price=float(price_title_a.find('span').text.lstrip('$')),
-                                main_image_url=li.find('img', class_='a-dynamic-image')['src'].replace('160,160', '')
-                            )
-                        )
-                    except Exception as e:
-                        pass
+                for li in related_products_wrapper.find_all('li', class_='a-carousel-card'):
+                    related_product = self.__parse_similar_product(li)
+
+                    if related_product and related_product.asin not in related_products_asins:
+                        related_products.append(related_product)
+                        related_products_asins.append(related_product.asin)
 
         comparison_table = soup.find('table', {'id':'HLCXComparisonTable'})
         similar_products = {}
@@ -445,7 +439,21 @@ class Parser:
         return searches
 
 
-    # -------------------------------------------------------- Private methods -------------------------------------------------------- #
+    # ---------------------------------------------------- Private methods --------------------------------------------------- #
+
+    @noraise(print_exc=False)
+    def __parse_similar_product(
+        self,
+        element: Union[BS4Element.Tag, BS4Element.NavigableString]
+    ) -> Optional[BaseProduct]:
+        price_title_a = element.find('div', class_='a-row a-color-price').find('a')
+
+        return BaseProduct(
+            title=self.__normalized_text(price_title_a['title']),
+            asin=element.find('div')['data-asin'],
+            price=float(price_title_a.find('span').text.lstrip('$')),
+            main_image_url=element.find('img', class_='a-dynamic-image')['src'].replace('160,160', '')
+        )
 
     @noraise()
     def __parse_response(
@@ -486,4 +494,4 @@ class Parser:
 
         return None
 
-# ---------------------------------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------------------------- #
