@@ -55,7 +55,7 @@ class Product(BaseProduct):
                         if image_url not in image_urls:
                             image_urls.append(image_url)
 
-                            if assoc_asin == asin and not main_image_url:
+                            if not main_image_url and (assoc_asin == asin or asin not in images.keys()):
                                 main_image_url = image_url
 
         super().__init__(title, asin, price, main_image_url)
