@@ -18,9 +18,8 @@ pip3 install amazon_buddy
 
 ~~~~python
 from amazon_buddy import Product, AmazonBuddy, Category, SortType
-from randomua import RandomUA
 
-ab = AmazonBuddy(debug=True, user_agent=RandomUA.firefox(min_browser_version=70))#'ADD_USER_AGENT')
+ab = AmazonBuddy(debug=True, user_agent='ADD_USER_AGENT')
 
 # # products = ab.search_products(
 # #     'face wash',

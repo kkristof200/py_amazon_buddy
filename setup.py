@@ -9,7 +9,7 @@ else:
 
 setuptools.setup(
     name="amazon_buddy",
-    version="2.0.20",
+    version="2.0.21",
     author="Kristof",
     description="python wrapper for the amazon_buddy npm package",
     long_description=long_description,
@@ -22,7 +22,6 @@ setuptools.setup(
         'kcu>=0.0.66',
         'ksimpleapi>=0.0.40',
         'noraise>=0.0.16',
-        'randomua>=0.0.7',
         'requests>=2.25.1',
         'Unidecode>=1.2.0'
     ],
