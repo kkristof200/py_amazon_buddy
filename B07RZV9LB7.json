@@ -1,0 +1,546 @@
+{
+    "py/object": "amazon_buddy.models.product.Product",
+    "title": "U.S. RubberShox DuraTPE Series Front-Rear Car Coil Spring Buffer Cushion\\/Automotive Suspension Shock Absorber Performance Booster Kit Universal Type A-F Vehicle Auto Parts(CSB,A) 3.07\"x 6.77\"(TD)",
+    "asin": "B07RZV9LB7",
+    "price": 29.99,
+    "main_image_url": "https://m.media-amazon.com/images/I/71pOKvV5dLL._AC_SL1500_.jpg",
+    "main_image_url_160": "https://m.media-amazon.com/images/I/71pOKvV5dLL._SL160_.jpg",
+    "main_image_url_500": "https://m.media-amazon.com/images/I/71pOKvV5dLL._SL500_.jpg",
+    "related_products": [
+        {
+            "py/object": "amazon_buddy.models.base_product.BaseProduct",
+            "title": "U.S. RubberShox Automotive Coil Spring Block Boosters Series Pack, Performance Enhancement for Car Coil Spring Shock Absorption and Protection of Auto Suspension System (4.5\"x 3\" x 2.5\")",
+            "asin": "B08KRZTVLT",
+            "price": 44.99,
+            "main_image_url": "https://m.media-amazon.com/images/I/51Lvs1fXSGL._AC_SR_.jpg",
+            "main_image_url_160": "https://m.media-amazon.com/images/I/51Lvs1fXSGL._SL160_.jpg",
+            "main_image_url_500": "https://m.media-amazon.com/images/I/51Lvs1fXSGL._SL500_.jpg"
+        },
+        {
+            "py/object": "amazon_buddy.models.base_product.BaseProduct",
+            "title": "2pc Car Shock Absorber Buffer Spring Bumper Cushion Transparent TPU Type A-E (B)",
+            "asin": "B07NLCV49F",
+            "price": 45.39,
+            "main_image_url": "https://m.media-amazon.com/images/I/31LT2h2TFhL._AC_SR_.jpg",
+            "main_image_url_160": "https://m.media-amazon.com/images/I/31LT2h2TFhL._SL160_.jpg",
+            "main_image_url_500": "https://m.media-amazon.com/images/I/31LT2h2TFhL._SL500_.jpg"
+        },
+        {
+            "py/object": "amazon_buddy.models.base_product.BaseProduct",
+            "title": "Shock Absorber, Fydun 2pc Car Shock Absorber Buffer Spring Bumper Cushion Transparent TPE Type A-F(A)",
+            "asin": "B07NLCQBCZ",
+            "price": 23.19,
+            "main_image_url": "https://m.media-amazon.com/images/I/31gcyul+NqL._AC_SR_.jpg",
+            "main_image_url_160": "https://m.media-amazon.com/images/I/31gcyul+NqL._SL160_.jpg",
+            "main_image_url_500": "https://m.media-amazon.com/images/I/31gcyul+NqL._SL500_.jpg"
+        },
+        {
+            "py/object": "amazon_buddy.models.base_product.BaseProduct",
+            "title": "KSP 3\" Front Leveling Lift Kits Fit for 2005-2020 F250 F350 super duty(SD) Edition, 3inch Front Coil Spring Spacers with Shock Extenders + 10.9 Degree High Strength Lug Bolts",
+            "asin": "B08D8TQ9LZ",
+            "price": 54.9,
+            "main_image_url": "https://m.media-amazon.com/images/I/41zOG-6gl8L._AC_SR_.jpg",
+            "main_image_url_160": "https://m.media-amazon.com/images/I/41zOG-6gl8L._SL160_.jpg",
+            "main_image_url_500": "https://m.media-amazon.com/images/I/41zOG-6gl8L._SL500_.jpg"
+        },
+        {
+            "py/object": "amazon_buddy.models.base_product.BaseProduct",
+            "title": "Akozon Shock Absorber 2pc Transparent Car Shock Absorber Buffer Spring Bumper Cushion Type A-E(B+)",
+            "asin": "B07PBV3R46",
+            "price": 38.99,
+            "main_image_url": "https://m.media-amazon.com/images/I/31jkU4p2uCL._AC_SR_.jpg",
+            "main_image_url_160": "https://m.media-amazon.com/images/I/31jkU4p2uCL._SL160_.jpg",
+            "main_image_url_500": "https://m.media-amazon.com/images/I/31jkU4p2uCL._SL500_.jpg"
+        },
+        {
+            "py/object": "amazon_buddy.models.base_product.BaseProduct",
+            "title": "2\" Rear Leveling Lift Kits for 2009-2018 Dodge Ram 1500 4X4 4WD 2WD, Dynofit Raise 2 Inch Rear Lift Spacer for Dodge Ram Suspension Lift Kits",
+            "asin": "B07PJMT3TC",
+            "price": 34.88,
+            "main_image_url": "https://m.media-amazon.com/images/I/31bUCgJnoaL._AC_SR_.jpg",
+            "main_image_url_160": "https://m.media-amazon.com/images/I/31bUCgJnoaL._SL160_.jpg",
+            "main_image_url_500": "https://m.media-amazon.com/images/I/31bUCgJnoaL._SL500_.jpg"
+        },
+        {
+            "py/object": "amazon_buddy.models.base_product.BaseProduct",
+            "title": "Shock Absorber, 2pc TPE Car Shock Absorber Buffer Reduce Noise Spring Bumper Cushion Type A-F, Red(B)",
+            "asin": "B07PDH7N7H",
+            "price": 36.09,
+            "main_image_url": "https://m.media-amazon.com/images/I/419NRZgJ88L._AC_SR_.jpg",
+            "main_image_url_160": "https://m.media-amazon.com/images/I/419NRZgJ88L._SL160_.jpg",
+            "main_image_url_500": "https://m.media-amazon.com/images/I/419NRZgJ88L._SL500_.jpg"
+        },
+        {
+            "py/object": "amazon_buddy.models.base_product.BaseProduct",
+            "title": "DuraSHOCK U.S. Car Coil Spring Buffer Cushion/Suspension Shock Absorber Retainer Automotive Front-Rear DuraTPE Performance Booster Kit for Universal Type A-F Vehicle Auto Parts (CSB Plus, A+)",
+            "asin": "B08L3MJKT3",
+            "price": 39.99,
+            "main_image_url": "https://m.media-amazon.com/images/I/514KqbTaAaL._AC_SR_.jpg",
+            "main_image_url_160": "https://m.media-amazon.com/images/I/514KqbTaAaL._SL160_.jpg",
+            "main_image_url_500": "https://m.media-amazon.com/images/I/514KqbTaAaL._SL500_.jpg"
+        },
+        {
+            "py/object": "amazon_buddy.models.base_product.BaseProduct",
+            "title": "Shock Absorber, Type-C 2pc Red Universal Car Rubber Shock Absorber Buffer Spring Bumper Cushion Type A-F Bushings (Type F)",
+            "asin": "B08JPQMPHD",
+            "price": 23.59,
+            "main_image_url": "https://m.media-amazon.com/images/I/41-EmkiONFL._AC_SR_.jpg",
+            "main_image_url_160": "https://m.media-amazon.com/images/I/41-EmkiONFL._SL160_.jpg",
+            "main_image_url_500": "https://m.media-amazon.com/images/I/41-EmkiONFL._SL500_.jpg"
+        },
+        {
+            "py/object": "amazon_buddy.models.base_product.BaseProduct",
+            "title": "labwork Rear Coil Spring Spacer Conversion Lift Kit MP1627 Fit for Chevrolet Ford GMC Lincoln Mercury (1 Pair)",
+            "asin": "B0897G3BVW",
+            "price": 39.0,
+            "main_image_url": "https://m.media-amazon.com/images/I/31lsA2E5MRL._AC_SR_.jpg",
+            "main_image_url_160": "https://m.media-amazon.com/images/I/31lsA2E5MRL._SL160_.jpg",
+            "main_image_url_500": "https://m.media-amazon.com/images/I/31lsA2E5MRL._SL500_.jpg"
+        }
+    ],
+    "similar_products": {},
+    "asins": [
+        "B07RZV9LB7",
+        "B08KRK9SNY",
+        "B08KRGG4VH",
+        "B08KRR9BVD",
+        "B08KRSMMJQ",
+        "B08KRTVRML",
+        "B08KRW9BS6",
+        "B08KRQ47ZD",
+        "B085R87SCG",
+        "B08L4NMYS7",
+        "B08KRH59PJ",
+        "B08L4PT2GT",
+        "B085RFR5PD",
+        "B07S1XVRC8",
+        "B085R9YC9B",
+        "B08L4MY4JP",
+        "B08L4P6P83",
+        "B07RZVC137",
+        "B07S2ZGXWY",
+        "B08KR9WCLT",
+        "B07T26KGQX",
+        "B07T25Y4WW",
+        "B08KRKSYPY",
+        "B08KRRNYVS",
+        "B08KRNVGF8",
+        "B08KRY88TL",
+        "B07S41GZHZ",
+        "B085RJDDFC",
+        "B07S31PLW3",
+        "B08KRW12QB",
+        "B08KRP6YWP",
+        "B08KRMQRY2"
+    ],
+    "associated_asins": [
+        "B08KRK9SNY",
+        "B08KRGG4VH",
+        "B08KRR9BVD",
+        "B08KRSMMJQ",
+        "B08KRTVRML",
+        "B08KRW9BS6",
+        "B08KRQ47ZD",
+        "B085R87SCG",
+        "B08L4NMYS7",
+        "B08KRH59PJ",
+        "B08L4PT2GT",
+        "B085RFR5PD",
+        "B07S1XVRC8",
+        "B085R9YC9B",
+        "B08L4MY4JP",
+        "B08L4P6P83",
+        "B07RZVC137",
+        "B07S2ZGXWY",
+        "B08KR9WCLT",
+        "B07T26KGQX",
+        "B07T25Y4WW",
+        "B08KRKSYPY",
+        "B08KRRNYVS",
+        "B08KRNVGF8",
+        "B08KRY88TL",
+        "B07S41GZHZ",
+        "B085RJDDFC",
+        "B07S31PLW3",
+        "B08KRW12QB",
+        "B08KRP6YWP",
+        "B08KRMQRY2"
+    ],
+    "images": {
+        "B08KRK9SNY": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KRK9SNY",
+            "name": "CSB Plus B",
+            "urls": [
+                "https://m.media-amazon.com/images/I/71tVn1UsTxL._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/814V1R+u3DL._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81-WjS6rsDS._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81MYoL7NNxL._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81tQpJpHZ+L._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/813+auq94ML._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/816DfMRQqcL._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/91kDQf3LCYL._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81G3zJ0f+DL._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/71FfrCiv6tL._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/817wRk0J0iL._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81myk02I4+S._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81M+a2xLK0L._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81+WkmCDXXL._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/91xC+KiUJ4L._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/71Ag5kNHqbL._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81EHHgG5u8L._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81HJ+QNP9VL._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/411B6hQ1CUL._AC_.jpg",
+                "https://m.media-amazon.com/images/I/81gDlslip6L._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/514hDJAxSNL._AC_.jpg",
+                "https://m.media-amazon.com/images/I/91OAu9zfi5L._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81lAQG5AnGL._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81gjGOkHv7L._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/71pOKvV5dLL._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81hyvF0cfjL._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81prUZD87JS._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81CI91oLg8S._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/91NY1SXPC3L._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/410OXL7ioeL._AC_.jpg",
+                "https://m.media-amazon.com/images/I/8176KsgxD0S._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/91RJFS8VsES._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81S+kdV9goS._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81nYcj65YES._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/41nfkH+IASL._AC_.jpg",
+                "https://m.media-amazon.com/images/I/81ZXhxNDrqL._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/81uqkaKFP0L._AC_SL1500_.jpg",
+                "https://m.media-amazon.com/images/I/61PoFnbzFvL._AC_SL1067_.jpg",
+                "https://m.media-amazon.com/images/I/419HfCwg-2L._AC_.jpg"
+            ]
+        },
+        "B08KRGG4VH": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KRGG4VH",
+            "name": "CSB Plus C",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08KRR9BVD": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KRR9BVD",
+            "name": "CSB Plus A",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08KRSMMJQ": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KRSMMJQ",
+            "name": "CSB Super A+",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08KRTVRML": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KRTVRML",
+            "name": "CSB Plus F",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08KRW9BS6": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KRW9BS6",
+            "name": "CSB Plus D",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08KRQ47ZD": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KRQ47ZD",
+            "name": "CSB Plus E",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B085R87SCG": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B085R87SCG",
+            "name": "CSB Pro B+",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08L4NMYS7": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08L4NMYS7",
+            "name": "CSB Pro F",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08KRH59PJ": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KRH59PJ",
+            "name": "CSB Plus B+",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08L4PT2GT": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08L4PT2GT",
+            "name": "CSB Pro E",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B085RFR5PD": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B085RFR5PD",
+            "name": "CSB Pro B",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B07S1XVRC8": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B07S1XVRC8",
+            "name": "CSB A+",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B085R9YC9B": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B085R9YC9B",
+            "name": "CSB Pro A",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08L4MY4JP": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08L4MY4JP",
+            "name": "CSB Pro D",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08L4P6P83": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08L4P6P83",
+            "name": "CSB Pro C",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B07RZVC137": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B07RZVC137",
+            "name": "CSB D",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B07S2ZGXWY": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B07S2ZGXWY",
+            "name": "CSB E",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08KR9WCLT": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KR9WCLT",
+            "name": "CSB Super B+",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B07T26KGQX": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B07T26KGQX",
+            "name": "CSB B",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B07T25Y4WW": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B07T25Y4WW",
+            "name": "CSB C",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B07RZV9LB7": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B07RZV9LB7",
+            "name": "CSB A",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08KRKSYPY": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KRKSYPY",
+            "name": "CSB Super E",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08KRRNYVS": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KRRNYVS",
+            "name": "CSB Super F",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08KRNVGF8": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KRNVGF8",
+            "name": "CSB Super C",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08KRY88TL": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KRY88TL",
+            "name": "CSB Super D",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B07S41GZHZ": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B07S41GZHZ",
+            "name": "CSB F",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B085RJDDFC": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B085RJDDFC",
+            "name": "CSB Pro A+",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B07S31PLW3": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B07S31PLW3",
+            "name": "CSB B+",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08KRW12QB": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KRW12QB",
+            "name": "CSB Super A",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08KRP6YWP": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KRP6YWP",
+            "name": "CSB Super B",
+            "urls": {
+                "py/id": 17
+            }
+        },
+        "B08KRMQRY2": {
+            "py/object": "amazon_buddy.models.product_image_set.ProductImageSet",
+            "asin": "B08KRMQRY2",
+            "name": "CSB Plus A+",
+            "urls": {
+                "py/id": 17
+            }
+        }
+    },
+    "image_urls": {
+        "py/id": 17
+    },
+    "categories": [
+        "automotive",
+        "replacement parts",
+        "shocks, struts & suspension",
+        "shock bushings"
+    ],
+    "features": [
+        "[(Package Contents)] :DuraTPE material with full ring design, reinforces Automotive Coil Spring Buffers/shock absorbers (2pc. Per pack - multiple size options). Designed for sub-compact to mid-size sedans- Up to 4500 Lbs GW, 5500 Lbs when combine with Rubber Block Booster.",
+        "[(Durable Material & Performance Enhancement )] : DuraTPE Thermoplastic Rubber - Environmental friendly and Resistant to coil abrasion, oil, salt, gravel & UV radiation. Enhances driving stability while extending the life of coil springs and the suspension system.Please check the template below to choose the correct buffer size.",
+        "[(Product Dimensions)] :For Car Coil Spring Gap (CCSG, when lifted and unloaded) smaller than buffer height H1 and bigger than groove height H2. For Size A, CCSG (when lifted and unloaded) is greater than H2 and smaller than H1, so 3.07\">CCGS>1.85\". Product outer diameter is D1, which is 6.77\". *Please lift the vehicle to measure the CCSP. Coil gap may vary between brands and years of use. Also refer to Size Chart in Photos and User Manual in Technical Specification.",
+        "[(Easy Installation)] : When picking the inner groove buffer height \"H2\" very close to the coil spring \"D\", you will get the best support and maximum ground clearance. However, the installation might be a little harder. You can cut off  1/2 \" of the top or both top and bottom inner rings to make it easier.",
+        "[(Peace of Mind)] :Enhanced stability: Prevents coil sagging with a reinforced suspension. This absorbs and dissipates the shock from rough road conditions.Most of the vehicle will have different size coil springs on the front and rear coil springs. Please make sure you measure the spring gaps on both ends to pick the correct size buffers."
+    ],
+    "videos": [
+        {
+            "py/object": "amazon_buddy.models.product_video.ProductVideo",
+            "url": "https://d2y5sgsy8bbmb8.cloudfront.net/399cff61-d42e-4453-bdf2-97def96ee487/default.jobtemplate.mp4.480.mp4",
+            "title": "How to Measure Coil Spring and Select Correct Buffer Size",
+            "height": 480,
+            "width": 854
+        },
+        {
+            "py/object": "amazon_buddy.models.product_video.ProductVideo",
+            "url": "https://d2y5sgsy8bbmb8.cloudfront.net/b0268d3d-1b77-4b29-aa2f-8af25acc2c8d/default.jobtemplate.mp4.480.mp4",
+            "title": "RubberSHOX-Installation Instruction for Buffers & Boosters",
+            "height": 480,
+            "width": 854
+        },
+        {
+            "py/object": "amazon_buddy.models.product_video.ProductVideo",
+            "url": "https://d2y5sgsy8bbmb8.cloudfront.net/8be190bb-f36e-487b-bc3a-87dee9bf8a97/default.jobtemplate.mp4.480.mp4",
+            "title": "DuraTPE Series for Front-Rear Car Coil Spring Buffers",
+            "height": 480,
+            "width": 854
+        }
+    ],
+    "video_urls": [
+        "https://d2y5sgsy8bbmb8.cloudfront.net/399cff61-d42e-4453-bdf2-97def96ee487/default.jobtemplate.mp4.480.mp4",
+        "https://d2y5sgsy8bbmb8.cloudfront.net/b0268d3d-1b77-4b29-aa2f-8af25acc2c8d/default.jobtemplate.mp4.480.mp4",
+        "https://d2y5sgsy8bbmb8.cloudfront.net/8be190bb-f36e-487b-bc3a-87dee9bf8a97/default.jobtemplate.mp4.480.mp4"
+    ],
+    "details": [
+        {
+            "py/object": "amazon_buddy.models.product_detail.ProductDetail",
+            "name": "Manufacturer",
+            "description": "RubberShox"
+        },
+        {
+            "py/object": "amazon_buddy.models.product_detail.ProductDetail",
+            "name": "Brand",
+            "description": "DuraTPE"
+        },
+        {
+            "py/object": "amazon_buddy.models.product_detail.ProductDetail",
+            "name": "Item Weight",
+            "description": "2.7 pounds"
+        },
+        {
+            "py/object": "amazon_buddy.models.product_detail.ProductDetail",
+            "name": "Product Dimensions",
+            "description": "12 x 4 x 8 inches"
+        },
+        {
+            "py/object": "amazon_buddy.models.product_detail.ProductDetail",
+            "name": "Manufacturer Part Number",
+            "description": "CSB-A-R"
+        },
+        {
+            "py/object": "amazon_buddy.models.product_detail.ProductDetail",
+            "name": "ASIN",
+            "description": "B07RZV9LB7"
+        },
+        {
+            "py/object": "amazon_buddy.models.product_detail.ProductDetail",
+            "name": "Date First Available",
+            "description": "May 21, 2019"
+        }
+    ]
+}
