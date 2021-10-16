@@ -37,7 +37,9 @@ class AmazonBuddy(Api):
         allow_redirects: bool = False,
         use_cloudscrape: bool = False,
         did_get_detected_callback: Optional[Callable] = None,
-        debug: bool = False
+        referers: Union[str, List[str]] = 'https://www.amazon.com',
+        debug: bool = False,
+        set_us_address: bool = False
     ):
         """init function
 
@@ -68,7 +70,8 @@ class AmazonBuddy(Api):
             use_cloudscrape=use_cloudscrape
         )
 
-        self.did_set_us_address = False
+        self.referers =  [referers] if isinstance(referers, str) else referers
+        self.did_set_us_address = not set_us_address
         self._parser = Parser(did_get_detected_callback)
 
 
@@ -83,11 +86,11 @@ class AmazonBuddy(Api):
             self._get(
                 'https://www.amazon.com/dp/{}'.format(asin),
                 extra_headers={
-                    'Referer': 'https://www.amazon.com',
+                    'Referer': random.choice(self.referers),# 'https://www.amazon.com',
                 }
             )
         )
-
+ 
     def get_product_reviews_with_images(
         self,
         asin: str
@@ -176,7 +179,7 @@ class AmazonBuddy(Api):
             'https://www.amazon.com/gp/glow/get-address-selections.html?deviceType=desktop&pageType=Gateway&storeContext=NoStoreName',
             extra_headers={
                 'Accept': 'text/html,*/*',
-                'Referer': 'https://www.amazon.com/',
+                'Referer': random.choice(self.referers),# 'https://www.amazon.com',
                 'X-Requested-With': 'XMLHttpRequest'
             }
         )
@@ -250,7 +253,7 @@ class AmazonBuddy(Api):
         base_url = 'https://www.amazon.com/s?k={}&i={}'.format(urllib.parse.quote(search_term), category)
         rh = RH.create_rh(min_price=min_price, max_price=max_price)
         # cat_id, ratings = cls.__get_search_cat_and_ratings(search_term, request)
-        suggested_rh = self.__get_suggested_rh(base_url, min_rating) if min_rating else None
+        suggested_rh = self.__get_suggested_rh(base_url, min_rating, proxy=proxy, user_agent=user_agent) if min_rating else None
 
         if suggested_rh:
             rh = suggested_rh + ('%2C' + rh) if rh else ''
@@ -271,7 +274,7 @@ class AmazonBuddy(Api):
         if self._request.keep_cookies and not self.did_set_us_address and use_us_address_if_needed:
             self.set_us_address()
 
-        return self.__solve(base_url, 'page', ProductFilter(min_price, max_price, min_rating, min_reviews, ignored_asins, ignored_title_strs), self._parser.parse_products, max_results)
+        return self.__solve(base_url, 'page', ProductFilter(min_price, max_price, min_rating, min_reviews, ignored_asins, ignored_title_strs), self._parser.parse_products, max_results, proxy=proxy, user_agent=user_agent)
 
     def get_reviews(
         self,
@@ -304,7 +307,7 @@ class AmazonBuddy(Api):
             'media_reviews_only' if media_reviews_only else 'all_contents'
         )
 
-        return self.__solve(base_url, 'pageNumber', ReviewFilter(min_rating, ignored_ids, ignore_foreign), self._parser.parse_reviews, max_results)
+        return self.__solve(base_url, 'pageNumber', ReviewFilter(min_rating, ignored_ids, ignore_foreign), self._parser.parse_reviews, max_results, proxy=proxy, user_agent=user_agent)
 
 
     # ---------------------------------------------------- Private methods --------------------------------------------------- #
@@ -313,8 +316,11 @@ class AmazonBuddy(Api):
         self,
         base_url: str,
         page_param_name: str,
-        filter, parse: Callable,
-        max_results: int
+        filter,
+        parse: Callable,
+        max_results: int,
+        proxy: Optional[str] = None,
+        user_agent: Optional[str] = None
     ) -> List:
         p = 0
         l = []
@@ -326,7 +332,21 @@ class AmazonBuddy(Api):
             p += 1
             url = base_url + '&{}={}'.format(page_param_name, p)
             # self.debug = False
-            new_elements = parse(self._get(url), debug=self.debug)
+            res = self._get(
+                url,
+                proxy=proxy or self.proxy,
+                user_agent=user_agent or self.user_agent
+            )
+
+            with open('test.html', 'w') as f:
+                f.write(res.text)
+
+            exit(0)
+
+            new_elements = parse(
+                res,
+                debug=self.debug
+            )
             filtered = filter.filter(new_elements)
             l.extend(filtered)
 
@@ -353,12 +373,21 @@ class AmazonBuddy(Api):
         self,
         url: str,
         min_rating: int,
-        max_try: int = 3
+        max_try: int = 3,
+        proxy: Optional[str] = None,
+        user_agent: Optional[str] = None
     ) -> Optional[str]:
         current_try = 1
 
         while current_try <= max_try:
-            rh = self._parser.parse_suggested_rh(self._get(url), int(min_rating))
+            rh = self._parser.parse_suggested_rh(self._get(
+                url,
+                proxy=proxy or self.proxy,
+                user_agent=user_agent or self.user_agent,
+                extra_headers={
+                    'Referer': random.choice(self.referers),# 'https://www.amazon.com',
+                }
+            ), int(min_rating))
 
             if rh:
                 return rh
@@ -371,7 +400,9 @@ class AmazonBuddy(Api):
     def __get_related_searches(
         self,
         url: str,
-        max_try: int = 3
+        max_try: int = 3,
+        proxy: Optional[str] = None,
+        user_agent: Optional[str] = None
     ) -> Optional[List[str]]:
         current_try = 1
 
@@ -381,8 +412,10 @@ class AmazonBuddy(Api):
                     url,
                     extra_headers={
                         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                        'Referer': 'https://www.amazon.com'
-                    }
+                        'Referer': random.choice(self.referers),# 'https://www.amazon.com',
+                    },
+                    proxy=proxy or self.proxy,
+                user_agent=user_agent or self.user_agent
                 )
             )
 
@@ -399,7 +432,9 @@ class AmazonBuddy(Api):
         category: Category,
         letter: str,
         locale: str,
-        max_results: int
+        max_results: int,
+        proxy: Optional[str] = None,
+        user_agent: Optional[str] = None
     ) -> List[str]:
         import time
         url = 'https://completion.amazon.com/api/2017/suggestions?lop={}&site-variant=desktop&client-info=amazon-search-ui&mid=ATVPDKIKX0DER&alias={}&ks=65&prefix={}&event=onKeyPress&limit=11&fb=1&suggestion-type=KEYWORD&_={}'.format(locale, category.value, letter, int(time.time()))
@@ -411,9 +446,11 @@ class AmazonBuddy(Api):
                 extra_headers={
                     'Accept': 'application/json, text/javascript, */*; q=0.01',
                     'Host': 'completion.amazon.com',
-                    'Referer': 'https://www.amazon.com/'
+                    'Referer': random.choice(self.referers),# 'https://www.amazon.com',
                 },
-                use_cookies=False
+                use_cookies=False,
+                proxy=proxy or self.proxy,
+                user_agent=user_agent or self.user_agent
             ).json()
 
             for suggestion in j['suggestions']:
