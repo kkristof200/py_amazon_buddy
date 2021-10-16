@@ -338,11 +338,6 @@ class AmazonBuddy(Api):
                 user_agent=user_agent or self.user_agent
             )
 
-            with open('test.html', 'w') as f:
-                f.write(res.text)
-
-            exit(0)
-
             new_elements = parse(
                 res,
                 debug=self.debug
