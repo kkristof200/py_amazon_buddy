@@ -11,7 +11,7 @@ from ksimpleapi import Api
 from kcu import strings
 
 # Local
-from .models import Category, SortType, ReviewRatingFilter, ReviewSortType, SearchResultProduct, Product, Review, ReviewImage
+from .models import Category, SortType, ReviewRatingFilter, ReviewSortType, SearchResultProduct, Product, Review, ReviewImage, AmazonError
 
 from ._filter import ProductFilter, ReviewFilter
 from ._parser import Parser
@@ -36,7 +36,7 @@ class AmazonBuddy(Api):
         keep_cookies: bool = True,
         allow_redirects: bool = False,
         use_cloudscrape: bool = False,
-        did_get_detected_callback: Optional[Callable] = None,
+        error_callback: Optional[Callable[[AmazonError], None]] = None,
         referers: Union[str, List[str]] = 'https://www.amazon.com',
         debug: bool = False,
         set_us_address: bool = False
@@ -51,7 +51,7 @@ class AmazonBuddy(Api):
             keep_cookies (bool, optional): Wether to use cookies or not. Defaults to True.
             allow_redirects (bool, optional): Wether to allow request redirects or not. Defaults to False.
             use_cloudscrape (bool, optional): Wether to use CloudScrape library instead of requests. Defaults to False.
-            did_get_detected_callback (Callable, optional): Called, when amazon returns a bot response.
+            error_callback (Callable, optional): Called, when amazon returns a bot response.
             debug (bool, optional): Show debug logs. Defaults to False.
         """
         super().__init__(
@@ -72,7 +72,7 @@ class AmazonBuddy(Api):
 
         self.referers =  [referers] if isinstance(referers, str) else referers
         self.did_set_us_address = not set_us_address
-        self._parser = Parser(did_get_detected_callback)
+        self._parser = Parser(error_callback)
 
 
     # ---------------------------------------------------- Public methods ---------------------------------------------------- #

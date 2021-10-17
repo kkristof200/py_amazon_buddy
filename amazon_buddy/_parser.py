@@ -13,8 +13,10 @@ from bs4 import element as BS4Element
 from kcu import request, kjson, strings
 from unidecode import unidecode
 
+from amazon_buddy.models.enums.amazon_error import AmazonError
+
 # Local
-from .models import SearchResultProduct, Product, BaseProduct, Review, ReviewImage
+from .models import SearchResultProduct, Product, BaseProduct, Review, ReviewImage, AmazonError
 
 # -------------------------------------------------------------------------------------------------------------------------------- #
 
@@ -28,9 +30,9 @@ class Parser:
 
     def __init__(
         self,
-        did_get_detected_callback: Optional[Callable] = None
+        error_callback: Optional[Callable[[AmazonError], None]] = None
     ):
-        self.did_get_detected_callback = did_get_detected_callback
+        self.error_callback = error_callback
 
 
     # ---------------------------------------------------- Public methods ---------------------------------------------------- #
@@ -55,8 +57,8 @@ class Parser:
             except Exception as e:
                 print('ERROR while printing response:', e)
 
-            if self.did_get_detected_callback:
-                self.did_get_detected_callback()
+            if self.error_callback:
+                self.error_callback(AmazonError.NoResponse)
 
             return None
 
@@ -301,7 +303,11 @@ class Parser:
         for div in [div for div in soup.find_all('div') if div.has_attr('data-asin') and len(div['data-asin']) > 0]:
             try:
                 asin = div['data-asin']
-                title = unidecode(html.unescape((div.find('span', class_='a-size-base-plus a-color-base a-text-normal') or div.find('span', class_='a-size-medium a-color-base a-text-normal')).text))
+                title = unidecode(
+                    html.unescape(
+                        div.find('h2').find('span').text
+                    )
+                )
 
                 try:
                     price = float(div.find('span', class_='a-price').find('span', class_='a-price-whole').text.replace(',', '')) + float(div.find('span', class_='a-price').find('span', class_='a-price-fraction').text.replace(',', '')) / 100
@@ -462,11 +468,20 @@ class Parser:
         allowed_response_status_codes: List[int] = [200, 201]
     ) -> Optional[bs]:
         if response is None:
+            self.error_callback(AmazonError.NoResponse)
+
             return None
 
         if response.status_code not in allowed_response_status_codes:
-            if response.status_code == 503 and self.did_get_detected_callback:
-                self.did_get_detected_callback()
+            kjson.print(response.request.headers)
+            if response.status_code == 503 and self.error_callback:
+                self.error_callback(AmazonError.AutomatedAccess)
+
+            return None
+
+        if len(response.text) < 10000 and 'errors/validateCaptcha' in response.text:
+            kjson.print(response.request.headers)
+            self.error_callback(AmazonError.AutomatedAccess)
 
             return None
 
