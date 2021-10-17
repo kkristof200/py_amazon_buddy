@@ -10,9 +10,9 @@ from enum import Enum
 # ------------------------------------------------------- enum: AmazonError ------------------------------------------------------ #
 
 class AmazonError(Enum):
-    NoResponse      = 0
-    Captcha         = 1
-    AutomatedAccess = 2
+    NoResponse      = 'NoResponse'
+    Captcha         = 'Captcha'
+    AutomatedAccess = 'AutomatedAccess'
 
 
 # -------------------------------------------------------------------------------------------------------------------------------- #

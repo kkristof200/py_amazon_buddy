@@ -90,7 +90,7 @@ class AmazonBuddy(Api):
                 }
             )
         )
- 
+
     def get_product_reviews_with_images(
         self,
         asin: str
