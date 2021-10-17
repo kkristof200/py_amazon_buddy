@@ -473,14 +473,12 @@ class Parser:
             return None
 
         if response.status_code not in allowed_response_status_codes:
-            kjson.print(response.request.headers)
             if response.status_code == 503 and self.error_callback:
                 self.error_callback(AmazonError.AutomatedAccess)
 
             return None
 
         if len(response.text) < 10000 and 'errors/validateCaptcha' in response.text:
-            kjson.print(response.request.headers)
             self.error_callback(AmazonError.AutomatedAccess)
 
             return None
