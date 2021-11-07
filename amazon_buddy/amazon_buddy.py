@@ -39,7 +39,8 @@ class AmazonBuddy(Api):
         error_callback: Optional[Callable[[AmazonError], None]] = None,
         referers: Union[str, List[str]] = 'https://www.amazon.com',
         debug: bool = False,
-        set_us_address: bool = False
+        set_us_address: bool = False,
+        default_request_timeout: Optional[float] = None
     ):
         """init function
 
@@ -67,7 +68,8 @@ class AmazonBuddy(Api):
             },
             allow_redirects=allow_redirects,
             debug=debug,
-            use_cloudscrape=use_cloudscrape
+            use_cloudscrape=use_cloudscrape,
+            default_request_timeout=default_request_timeout
         )
 
         self.referers =  [referers] if isinstance(referers, str) else referers
