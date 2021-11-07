@@ -40,6 +40,7 @@ class AmazonBuddy(Api):
         referers: Union[str, List[str]] = 'https://www.amazon.com',
         debug: bool = False,
         set_us_address: bool = False,
+        extra_headers: Optional[dict] = None,
         default_request_timeout: Optional[float] = None
     ):
         """init function
@@ -55,17 +56,21 @@ class AmazonBuddy(Api):
             error_callback (Callable, optional): Called, when amazon returns a bot response.
             debug (bool, optional): Show debug logs. Defaults to False.
         """
+
+        extra_headers = extra_headers or {}
+        extra_headers.update({
+            'Host': 'www.amazon.com',
+            'Origin': 'https://www.amazon.com',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        })
+
         super().__init__(
             user_agent=user_agent,
             proxy=proxy,
             keep_cookies=keep_cookies,
             max_request_try_count=max_request_try_count,
             sleep_s_between_failed_requests=sleep_s_between_failed_requests,
-            extra_headers={
-                'Host': 'www.amazon.com',
-                'Origin': 'https://www.amazon.com',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            },
+            extra_headers=extra_headers,
             allow_redirects=allow_redirects,
             debug=debug,
             use_cloudscrape=use_cloudscrape,
