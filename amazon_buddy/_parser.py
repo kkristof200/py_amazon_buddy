@@ -237,11 +237,11 @@ class Parser:
                 price = this_similar_product.price
 
         try:
-            descripton = soup.find('div', {'id':'productDescription'}).find('p').text.strip()
+            description = soup.find('div', {'id':'productDescription'}).find('p').text.strip()
         except:
-            descripton = None
+            description = None
 
-        return Product(title, asin, price, categories, features, descripton, details, image_details, videos, related_products, similar_products)
+        return Product(title, asin, price, categories, features, description, details, image_details, videos, related_products, similar_products)
 
     def parse_reviews_with_images(self, response: Optional[Response], debug: bool = False) -> Optional[List[ReviewImage]]:
         # 'https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin='
