@@ -41,7 +41,8 @@ class AmazonBuddy(Api):
         debug: bool = False,
         set_us_address: bool = False,
         extra_headers: Optional[dict] = None,
-        default_request_timeout: Optional[float] = None
+        default_request_timeout: Optional[float] = None,
+        domain: str = 'www.amazon.com',
     ):
         """init function
 
@@ -59,8 +60,8 @@ class AmazonBuddy(Api):
 
         extra_headers = extra_headers or {}
         extra_headers.update({
-            'Host': 'www.amazon.com',
-            'Origin': 'https://www.amazon.com',
+            'Host': this.domain,
+            'Origin': 'https://{}'.format(this.domain),
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         })
 
@@ -91,7 +92,7 @@ class AmazonBuddy(Api):
     ) -> Optional[Product]:
         return self._parser.parse_product(
             self._get(
-                'https://www.amazon.com/dp/{}'.format(asin),
+                'https://{}/dp/{}'.format(this.domain, asin),
                 extra_headers={
                     'Referer': random.choice(self.referers),# 'https://www.amazon.com',
                 }
@@ -104,20 +105,20 @@ class AmazonBuddy(Api):
     ) -> Optional[List[ReviewImage]]:
         try:
             # return self._parser.parse_reviews_with_images(
-            #     self._get('https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin={}'.format(asin))
+            #     self._get('https://{}/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin={}'.format(this.domain, asin))
             # )
             data = 'asin={}noCache={}'.format(asin, int(time.time() * 1000))
 
             return self._parser.parse_reviews_with_images(
                 self._post(
-                    'https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin',
+                    'https://{}/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin'.format(this.domain),
                     body=data,
                     extra_headers={
                         'Accept': '*/*',
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest',
                         'Content-Length': len(data),
-                        'Referer': 'https://www.amazon.com/product-reviews/{}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews'.format(asin)
+                        'Referer': 'https://{}/product-reviews/{}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews'.format(this.domain, asin)
                     }
                 )
             )
@@ -138,7 +139,7 @@ class AmazonBuddy(Api):
             category = category.value
 
         return self.__get_related_searches(
-            'https://www.amazon.com/s?k={}&i={}&ref=nb_sb_noss'.format(urllib.parse.quote(search_term), category)
+            'https://{}/s?k={}&i={}&ref=nb_sb_noss'.format(this.domain, urllib.parse.quote(search_term), category)
         )
 
     def get_trends(
@@ -181,9 +182,9 @@ class AmazonBuddy(Api):
             return True
 
         self.keep_cookies = True
-        self._get('https://www.amazon.com')
+        self._get('https://{}'.format(this.domain))
         address_selections_res = self._get(
-            'https://www.amazon.com/gp/glow/get-address-selections.html?deviceType=desktop&pageType=Gateway&storeContext=NoStoreName',
+            'https://{}/gp/glow/get-address-selections.html?deviceType=desktop&pageType=Gateway&storeContext=NoStoreName'.format(this.domain),
             extra_headers={
                 'Accept': 'text/html,*/*',
                 'Referer': random.choice(self.referers),# 'https://www.amazon.com',
@@ -210,7 +211,7 @@ class AmazonBuddy(Api):
         data = 'locationType=LOCATION_INPUT&zipCode={}&storeContext=generic&deviceType=web&pageType=Gateway&actionSource=glow&almBrandId=undefined'.format(zip_code)
 
         res = self._post(
-            'https://www.amazon.com/gp/delivery/ajax/address-change.html',
+            'https://{}/gp/delivery/ajax/address-change.html'.format(this.domain),
             body=data,
             extra_headers={
                 'Accept': 'text/html,*/*',
@@ -218,7 +219,7 @@ class AmazonBuddy(Api):
                 'X-Requested-With': 'XMLHttpRequest',
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'contentType': 'application/x-www-form-urlencoded;charset=utf-8',
-                'Referer': 'https://www.amazon.com',
+                'Referer': 'https://{}'.format(this.domain),
                 'anti-csrftoken-a2z': csrf_token
             }
         )
@@ -257,7 +258,7 @@ class AmazonBuddy(Api):
         if type(category) == type(Category.ALL_DEPARTMENTS):
             category = category.value
 
-        base_url = 'https://www.amazon.com/s?k={}&i={}'.format(urllib.parse.quote(search_term), category)
+        base_url = 'https://{}/s?k={}&i={}'.format(this.domain, urllib.parse.quote(search_term), category)
         rh = RH.create_rh(min_price=min_price, max_price=max_price)
         # cat_id, ratings = cls.__get_search_cat_and_ratings(search_term, request)
         suggested_rh = self.__get_suggested_rh(base_url, min_rating, proxy=proxy, user_agent=user_agent) if min_rating else None
@@ -306,7 +307,8 @@ class AmazonBuddy(Api):
         max_results: int = 100,
         debug: bool = False
     ) -> Optional[List[Review]]:
-        base_url = 'https://www.amazon.com/product-reviews/{}/ref=cm_cr_arp_d_viewopt_srt?ie=UTF8&reviewerType={}&filterByStar={}&sortBy={}&formatType=current_format&mediaType={}'.format(
+        base_url = 'https://{}/product-reviews/{}/ref=cm_cr_arp_d_viewopt_srt?ie=UTF8&reviewerType={}&filterByStar={}&sortBy={}&formatType=current_format&mediaType={}'.format(
+            this.domain,
             asin,
             'avp_only_reviews' if verified_purchases_only else 'all_reviews',
             (review_rating_filter or ReviewRatingFilter.STAR_ALL).value,
