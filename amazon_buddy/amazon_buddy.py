@@ -60,8 +60,8 @@ class AmazonBuddy(Api):
 
         extra_headers = extra_headers or {}
         extra_headers.update({
-            'Host': self.domain,
-            'Origin': 'https://{}'.format(self.domain),
+            'Host': domain,
+            'Origin': 'https://{}'.format(domain),
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         })
 
@@ -81,6 +81,7 @@ class AmazonBuddy(Api):
         self.referers =  [referers] if isinstance(referers, str) else referers
         self.did_set_us_address = not set_us_address
         self._parser = Parser(error_callback)
+        self.domain = domain
 
 
     # ---------------------------------------------------- Public methods ---------------------------------------------------- #
