@@ -325,7 +325,7 @@ class Parser:
                     rating = 0
                     review_count = 0
 
-                products.append(SearchResultProduct(asin, title, price, rating, review_count))
+                products.append(SearchResultProduct(self.domain, asin, title, price, rating, review_count))
             except:# Exception as e:
                 pass
                 # if debug:

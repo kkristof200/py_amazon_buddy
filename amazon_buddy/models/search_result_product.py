@@ -18,6 +18,7 @@ class SearchResultProduct(JSONCodable):
 
     def __init__(
         self,
+        domain: str,
         asin: str,
         title: str,
         price: float,
@@ -25,7 +26,7 @@ class SearchResultProduct(JSONCodable):
         review_count: int
     ):
         self.asin = asin
-        self.url = 'https://www.amazon.com/dp/' + asin
+        self.url = 'https://{}/dp/{}'.format(domain, asin)
 
         self.title = title
         self.price = price
