@@ -60,8 +60,8 @@ class AmazonBuddy(Api):
 
         extra_headers = extra_headers or {}
         extra_headers.update({
-            'Host': this.domain,
-            'Origin': 'https://{}'.format(this.domain),
+            'Host': self.domain,
+            'Origin': 'https://{}'.format(self.domain),
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         })
 
@@ -92,7 +92,7 @@ class AmazonBuddy(Api):
     ) -> Optional[Product]:
         return self._parser.parse_product(
             self._get(
-                'https://{}/dp/{}'.format(this.domain, asin),
+                'https://{}/dp/{}'.format(self.domain, asin),
                 extra_headers={
                     'Referer': random.choice(self.referers),# 'https://www.amazon.com',
                 }
@@ -105,20 +105,20 @@ class AmazonBuddy(Api):
     ) -> Optional[List[ReviewImage]]:
         try:
             # return self._parser.parse_reviews_with_images(
-            #     self._get('https://{}/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin={}'.format(this.domain, asin))
+            #     self._get('https://{}/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin={}'.format(self.domain, asin))
             # )
             data = 'asin={}noCache={}'.format(asin, int(time.time() * 1000))
 
             return self._parser.parse_reviews_with_images(
                 self._post(
-                    'https://{}/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin'.format(this.domain),
+                    'https://{}/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin'.format(self.domain),
                     body=data,
                     extra_headers={
                         'Accept': '*/*',
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest',
                         'Content-Length': len(data),
-                        'Referer': 'https://{}/product-reviews/{}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews'.format(this.domain, asin)
+                        'Referer': 'https://{}/product-reviews/{}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews'.format(self.domain, asin)
                     }
                 )
             )
@@ -139,7 +139,7 @@ class AmazonBuddy(Api):
             category = category.value
 
         return self.__get_related_searches(
-            'https://{}/s?k={}&i={}&ref=nb_sb_noss'.format(this.domain, urllib.parse.quote(search_term), category)
+            'https://{}/s?k={}&i={}&ref=nb_sb_noss'.format(self.domain, urllib.parse.quote(search_term), category)
         )
 
     def get_trends(
@@ -182,9 +182,9 @@ class AmazonBuddy(Api):
             return True
 
         self.keep_cookies = True
-        self._get('https://{}'.format(this.domain))
+        self._get('https://{}'.format(self.domain))
         address_selections_res = self._get(
-            'https://{}/gp/glow/get-address-selections.html?deviceType=desktop&pageType=Gateway&storeContext=NoStoreName'.format(this.domain),
+            'https://{}/gp/glow/get-address-selections.html?deviceType=desktop&pageType=Gateway&storeContext=NoStoreName'.format(self.domain),
             extra_headers={
                 'Accept': 'text/html,*/*',
                 'Referer': random.choice(self.referers),# 'https://www.amazon.com',
@@ -211,7 +211,7 @@ class AmazonBuddy(Api):
         data = 'locationType=LOCATION_INPUT&zipCode={}&storeContext=generic&deviceType=web&pageType=Gateway&actionSource=glow&almBrandId=undefined'.format(zip_code)
 
         res = self._post(
-            'https://{}/gp/delivery/ajax/address-change.html'.format(this.domain),
+            'https://{}/gp/delivery/ajax/address-change.html'.format(self.domain),
             body=data,
             extra_headers={
                 'Accept': 'text/html,*/*',
@@ -219,7 +219,7 @@ class AmazonBuddy(Api):
                 'X-Requested-With': 'XMLHttpRequest',
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'contentType': 'application/x-www-form-urlencoded;charset=utf-8',
-                'Referer': 'https://{}'.format(this.domain),
+                'Referer': 'https://{}'.format(self.domain),
                 'anti-csrftoken-a2z': csrf_token
             }
         )
@@ -258,7 +258,7 @@ class AmazonBuddy(Api):
         if type(category) == type(Category.ALL_DEPARTMENTS):
             category = category.value
 
-        base_url = 'https://{}/s?k={}&i={}'.format(this.domain, urllib.parse.quote(search_term), category)
+        base_url = 'https://{}/s?k={}&i={}'.format(self.domain, urllib.parse.quote(search_term), category)
         rh = RH.create_rh(min_price=min_price, max_price=max_price)
         # cat_id, ratings = cls.__get_search_cat_and_ratings(search_term, request)
         suggested_rh = self.__get_suggested_rh(base_url, min_rating, proxy=proxy, user_agent=user_agent) if min_rating else None
@@ -308,7 +308,7 @@ class AmazonBuddy(Api):
         debug: bool = False
     ) -> Optional[List[Review]]:
         base_url = 'https://{}/product-reviews/{}/ref=cm_cr_arp_d_viewopt_srt?ie=UTF8&reviewerType={}&filterByStar={}&sortBy={}&formatType=current_format&mediaType={}'.format(
-            this.domain,
+            self.domain,
             asin,
             'avp_only_reviews' if verified_purchases_only else 'all_reviews',
             (review_rating_filter or ReviewRatingFilter.STAR_ALL).value,
