@@ -3,7 +3,7 @@
 # System
 from typing import Optional, List, Dict, Callable, Union
 import urllib.parse
-import os, time, random
+import time, random
 
 # Pip
 from noraise import noraise
@@ -16,6 +16,7 @@ from .models import Category, SortType, ReviewRatingFilter, ReviewSortType, Sear
 from ._filter import ProductFilter, ReviewFilter
 from ._parser import Parser
 from ._rh import RH
+from ._constants import ZIP_CODES_US
 
 # -------------------------------------------------------------------------------------------------------------------------------- #
 
@@ -41,7 +42,9 @@ class AmazonBuddy(Api):
         debug: bool = False,
         set_us_address: bool = False,
         extra_headers: Optional[dict] = None,
-        default_request_timeout: Optional[float] = None
+        default_request_timeout: Optional[float] = None,
+        domain: str = 'www.amazon.com',
+        zip_codes: Optional[List[int]] = None
     ):
         """init function
 
@@ -59,8 +62,8 @@ class AmazonBuddy(Api):
 
         extra_headers = extra_headers or {}
         extra_headers.update({
-            'Host': 'www.amazon.com',
-            'Origin': 'https://www.amazon.com',
+            'Host': domain,
+            'Origin': 'https://{}'.format(domain),
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         })
 
@@ -80,6 +83,8 @@ class AmazonBuddy(Api):
         self.referers =  [referers] if isinstance(referers, str) else referers
         self.did_set_us_address = not set_us_address
         self._parser = Parser(error_callback)
+        self.domain = domain
+        self.zip_codes = zip_codes if zip_codes is not None else ZIP_CODES_US
 
 
     # ---------------------------------------------------- Public methods ---------------------------------------------------- #
@@ -91,7 +96,7 @@ class AmazonBuddy(Api):
     ) -> Optional[Product]:
         return self._parser.parse_product(
             self._get(
-                'https://www.amazon.com/dp/{}'.format(asin),
+                'https://{}/dp/{}'.format(self.domain, asin),
                 extra_headers={
                     'Referer': random.choice(self.referers),# 'https://www.amazon.com',
                 }
@@ -104,20 +109,20 @@ class AmazonBuddy(Api):
     ) -> Optional[List[ReviewImage]]:
         try:
             # return self._parser.parse_reviews_with_images(
-            #     self._get('https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin={}'.format(asin))
+            #     self._get('https://{}/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin={}'.format(self.domain, asin))
             # )
             data = 'asin={}noCache={}'.format(asin, int(time.time() * 1000))
 
             return self._parser.parse_reviews_with_images(
                 self._post(
-                    'https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin',
+                    'https://{}/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin'.format(self.domain),
                     body=data,
                     extra_headers={
                         'Accept': '*/*',
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest',
                         'Content-Length': len(data),
-                        'Referer': 'https://www.amazon.com/product-reviews/{}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews'.format(asin)
+                        'Referer': 'https://{}/product-reviews/{}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews'.format(self.domain, asin)
                     }
                 )
             )
@@ -138,7 +143,7 @@ class AmazonBuddy(Api):
             category = category.value
 
         return self.__get_related_searches(
-            'https://www.amazon.com/s?k={}&i={}&ref=nb_sb_noss'.format(urllib.parse.quote(search_term), category)
+            'https://{}/s?k={}&i={}&ref=nb_sb_noss'.format(self.domain, urllib.parse.quote(search_term), category)
         )
 
     def get_trends(
@@ -181,9 +186,9 @@ class AmazonBuddy(Api):
             return True
 
         self.keep_cookies = True
-        self._get('https://www.amazon.com')
+        self._get('https://{}'.format(self.domain))
         address_selections_res = self._get(
-            'https://www.amazon.com/gp/glow/get-address-selections.html?deviceType=desktop&pageType=Gateway&storeContext=NoStoreName',
+            'https://{}/gp/glow/get-address-selections.html?deviceType=desktop&pageType=Gateway&storeContext=NoStoreName'.format(self.domain),
             extra_headers={
                 'Accept': 'text/html,*/*',
                 'Referer': random.choice(self.referers),# 'https://www.amazon.com',
@@ -205,12 +210,12 @@ class AmazonBuddy(Api):
 
             return False
 
-        zip_code = zip_code or random.choice([10001, 10002, 10003, 10004, 10005, 10006, 10007, 10008, 10009, 10010, 10011, 10012, 10013, 10014, 10015, 10016, 10017, 10018, 10019, 10020, 10021, 10022, 10023, 10024, 10025, 10026, 10027, 10028, 10029, 10030, 10031, 10032, 10033, 10034, 10035, 10036, 10037, 10038, 10039, 10040, 10041, 10043, 10044, 10045, 10046, 10047, 10048, 10055, 10060, 10069, 10072, 10079, 10080, 10081, 10082, 10087, 10090, 10094, 10095, 10096, 10098, 10099, 10101, 10102, 10103, 10104, 10105, 10106, 10107, 10108, 10109, 10110, 10111, 10112, 10113, 10114, 10115, 10116, 10117, 10118, 10119, 10120, 10121, 10122, 10123, 10124, 10125, 10126, 10128, 10129, 10130, 10131, 10132, 10133, 10138, 10149, 10150, 10151, 10152, 10153, 10154, 10155, 10156, 10157, 10158, 10159, 10160, 10161, 10162, 10163, 10164, 10165, 10166, 10167, 10168, 10169, 10170, 10171, 10172, 10173, 10174, 10175, 10176, 10177, 10178, 10179, 10184, 10185, 10196, 10197, 10199, 10203, 10211, 10212, 10213, 10242, 10249, 10256, 10257, 10258, 10259, 10260, 10261, 10265, 10268, 10269, 10270, 10271, 10272, 10273, 10274, 10275, 10276, 10277, 10278, 10279, 10280, 10281, 10282, 10285, 10286, 10292, 90001, 90002, 90003, 90004, 90005, 90006, 90007, 90008, 90009, 90010, 90011, 90012, 90013, 90014, 90015, 90016, 90017, 90018, 90019, 90020, 90021, 90022, 90023, 90024, 90025, 90026, 90027, 90028, 90029, 90030, 90031, 90032, 90033, 90034, 90035, 90036, 90037, 90038, 90039, 90040, 90041, 90042, 90043, 90044, 90045, 90046, 90047, 90048, 90049, 90050, 90051, 90052, 90053, 90054, 90055, 90056, 90057, 90058, 90059, 90060, 90061, 90062, 90063, 90064, 90065, 90066, 90067, 90068, 90070, 90071, 90072, 90073, 90074, 90075, 90076, 90077, 90078, 90079, 90080, 90081, 90082, 90083, 90084, 90086, 90087, 90088, 90089, 90091, 90093, 90094, 90095, 90096, 90097, 90099, 90101, 90102, 90103, 90174, 90185])
+        zip_code = zip_code or random.choice(self.zip_codes)
 
         data = 'locationType=LOCATION_INPUT&zipCode={}&storeContext=generic&deviceType=web&pageType=Gateway&actionSource=glow&almBrandId=undefined'.format(zip_code)
 
         res = self._post(
-            'https://www.amazon.com/gp/delivery/ajax/address-change.html',
+            'https://{}/gp/delivery/ajax/address-change.html'.format(self.domain),
             body=data,
             extra_headers={
                 'Accept': 'text/html,*/*',
@@ -218,7 +223,7 @@ class AmazonBuddy(Api):
                 'X-Requested-With': 'XMLHttpRequest',
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'contentType': 'application/x-www-form-urlencoded;charset=utf-8',
-                'Referer': 'https://www.amazon.com',
+                'Referer': 'https://{}'.format(self.domain),
                 'anti-csrftoken-a2z': csrf_token
             }
         )
@@ -257,7 +262,7 @@ class AmazonBuddy(Api):
         if type(category) == type(Category.ALL_DEPARTMENTS):
             category = category.value
 
-        base_url = 'https://www.amazon.com/s?k={}&i={}'.format(urllib.parse.quote(search_term), category)
+        base_url = 'https://{}/s?k={}&i={}'.format(self.domain, urllib.parse.quote(search_term), category)
         rh = RH.create_rh(min_price=min_price, max_price=max_price)
         # cat_id, ratings = cls.__get_search_cat_and_ratings(search_term, request)
         suggested_rh = self.__get_suggested_rh(base_url, min_rating, proxy=proxy, user_agent=user_agent) if min_rating else None
@@ -306,7 +311,8 @@ class AmazonBuddy(Api):
         max_results: int = 100,
         debug: bool = False
     ) -> Optional[List[Review]]:
-        base_url = 'https://www.amazon.com/product-reviews/{}/ref=cm_cr_arp_d_viewopt_srt?ie=UTF8&reviewerType={}&filterByStar={}&sortBy={}&formatType=current_format&mediaType={}'.format(
+        base_url = 'https://{}/product-reviews/{}/ref=cm_cr_arp_d_viewopt_srt?ie=UTF8&reviewerType={}&filterByStar={}&sortBy={}&formatType=current_format&mediaType={}'.format(
+            self.domain,
             asin,
             'avp_only_reviews' if verified_purchases_only else 'all_reviews',
             (review_rating_filter or ReviewRatingFilter.STAR_ALL).value,
@@ -438,7 +444,6 @@ class AmazonBuddy(Api):
         proxy: Optional[str] = None,
         user_agent: Optional[str] = None
     ) -> List[str]:
-        import time
         url = 'https://completion.amazon.com/api/2017/suggestions?lop={}&site-variant=desktop&client-info=amazon-search-ui&mid=ATVPDKIKX0DER&alias={}&ks=65&prefix={}&event=onKeyPress&limit=11&fb=1&suggestion-type=KEYWORD&_={}'.format(locale, category.value, letter, int(time.time()))
         suggestions = []
 

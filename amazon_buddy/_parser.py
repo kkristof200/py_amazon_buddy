@@ -1,8 +1,8 @@
 # ------------------------------------------------------------ Imports ----------------------------------------------------------- #
 
 # System
-import html, json, traceback, copy
-from typing import Optional, List, Dict, Union, Tuple, Callable
+import html, json
+from typing import Optional, List, Dict, Union, Callable
 from urllib.parse import unquote
 
 # Pip
@@ -10,7 +10,7 @@ from requests import Response
 from noraise import noraise
 from bs4 import BeautifulSoup as bs
 from bs4 import element as BS4Element
-from kcu import request, kjson, strings
+from kcu import strings
 from unidecode import unidecode
 
 from amazon_buddy.models.enums.amazon_error import AmazonError
@@ -325,7 +325,7 @@ class Parser:
                     rating = 0
                     review_count = 0
 
-                products.append(SearchResultProduct(asin, title, price, rating, review_count))
+                products.append(SearchResultProduct(self.domain, asin, title, price, rating, review_count))
             except:# Exception as e:
                 pass
                 # if debug:
