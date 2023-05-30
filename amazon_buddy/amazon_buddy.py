@@ -441,7 +441,6 @@ class AmazonBuddy(Api):
         proxy: Optional[str] = None,
         user_agent: Optional[str] = None
     ) -> List[str]:
-        import time
         url = 'https://completion.amazon.com/api/2017/suggestions?lop={}&site-variant=desktop&client-info=amazon-search-ui&mid=ATVPDKIKX0DER&alias={}&ks=65&prefix={}&event=onKeyPress&limit=11&fb=1&suggestion-type=KEYWORD&_={}'.format(locale, category.value, letter, int(time.time()))
         suggestions = []
 
