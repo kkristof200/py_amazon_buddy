@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup as bs
 from bs4 import element as BS4Element
 from kcu import request, kjson, strings
 from unidecode import unidecode
+from bs4 import BeautifulSoup
 
 from amazon_buddy.models.enums.amazon_error import AmazonError
 
@@ -248,49 +249,25 @@ class Parser:
         if not response or response.status_code not in [200, 201]:
             return None
 
-        try:
-            reviews_json = self.__json_loads(response.text)
-        except Exception as e:
-            if debug:
-                print(e)
+        items = eval('[%s]' % response.text.replace('&&&', ',').strip(','))
 
-            return None
+        update = [item for item in items if item[0] == 'update'][0]
+        reviews = [item[-1] for item in items if item[0] == 'append' and item[1] == '#cm_cr-review_list' and item[2].startswith('<div id=')]
 
-        reviews = {}
-        details = reviews_json['images']
+        parsed_reviews = []
+        for review in reviews:
+            soup = BeautifulSoup(review, 'html.parser')
+            title_element = soup.select('a[data-hook="review-title"]')[0]
+            ratings = title_element.find('span', class_='a-icon-alt').text.strip()
+            title = title_element.select('span')[-1].text.strip()
+            author = soup.find('div', class_='a-profile-content').find('span').text.strip()
+            body = soup.find('span', {'data-hook': 'review-body'}).text.strip()
+            upvotes = soup.find('span', {'data-hook': 'helpful-vote-statement'}).text.strip()
+            image_section = soup.find('div', class_='review-image-tile-section')
+            image_urls = [img['src'] for img in image_section.find_all('img')] if image_section else []
+            parsed_reviews.append(ReviewImage(author, title, body, ratings, image_urls, upvotes))
 
-        for elem in details:
-            try:
-                author = elem['associatedReview']['author']['name']
-                text = elem['associatedReview']['text']
-                clean_text = bs(text, "lxml").text.replace('  ', ' ')
-                review_key = elem['associatedReview']['reviewId']
-
-                if review_key in reviews:
-                    review = reviews[review_key]
-                else:
-                    review = {
-                        'author': author,
-                        'text': clean_text,
-                        'rating': elem['associatedReview']['overallRating'],
-                        'image_urls': []
-                    }
-
-                    if 'scores' in elem['associatedReview'] and 'helpfulVotes' in elem['associatedReview']['scores']:
-                        review['upvotes'] = int(elem['associatedReview']['scores']['helpfulVotes'])
-                    else:
-                        review['upvotes'] = 0
-
-                img_url = elem['mediumImage']
-                review['image_urls'].append(img_url)
-
-                reviews[review_key] = review
-            except Exception as e:
-                if debug:
-                    print(e)
-
-        return [ReviewImage(r['author'], r['text'], r['rating'], r['image_urls'], r['upvotes'])
-                for r in sorted(reviews.values(), key=lambda k: k['upvotes'], reverse=True)]
+        return parsed_reviews
 
     def parse_products(self, response: Optional[Response], debug: bool = False) -> List[SearchResultProduct]:
         soup = self.__parse_response(response)

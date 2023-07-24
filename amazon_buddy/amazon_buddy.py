@@ -106,15 +106,15 @@ class AmazonBuddy(Api):
             # return self._parser.parse_reviews_with_images(
             #     self._get('https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin?asin={}'.format(asin))
             # )
-            data = 'asin={}noCache={}'.format(asin, int(time.time() * 1000))
+            data = 'sortBy=&reviewerType=all_reviews&formatType=&mediaType=media_reviews_only&filterByStar=positive&filterByAge=&pageNumber=1&filterByLanguage=&filterByKeyword=&shouldAppend=undefined&deviceType=desktop&canShowIntHeader=undefined&reftag=cm_cr_arp_d_viewopt_mdrvw&pageSize=10&asin={}&scope=reviewsAjax3'.format(asin)
 
             return self._parser.parse_reviews_with_images(
                 self._post(
-                    'https://www.amazon.com/gp/customer-reviews/aj/private/reviewsGallery/get-data-for-reviews-image-gallery-for-asin',
+                    'https://www.amazon.com/hz/reviews-render/ajax/reviews/get/ref=cm_cr_arp_d_viewopt_mdrvw',
                     body=data,
                     extra_headers={
-                        'Accept': '*/*',
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'text/html,*/*',
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
                         'X-Requested-With': 'XMLHttpRequest',
                         'Content-Length': len(data),
                         'Referer': 'https://www.amazon.com/product-reviews/{}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews'.format(asin)

@@ -17,12 +17,14 @@ class ReviewImage(JSONCodable):
     def __init__(
         self,
         author: str,
+        title: str,
         text: str,
         rating: int,
         image_urls: List[str],
         upvotes: int
     ):
         self.author = author
+        self.title = title
         self.text = text
         self.rating = rating
         self.image_urls = image_urls
